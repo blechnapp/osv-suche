@@ -2,37 +2,51 @@
 
 namespace OSVSuche\Controllers;
 
+use Plenty\Modules\Plugin\Storage\Contracts\StorageRepositoryContract;
 use Plenty\Modules\Webshop\ItemSearch\SearchPresets\VariationList;
 use Plenty\Modules\Webshop\ItemSearch\Services\ItemSearchService;
-use Plenty\Plugin\CachingRepository;
+use Plenty\Plugin\ConfigRepository;
 use Plenty\Plugin\Controller;
 use Plenty\Plugin\Http\Request;
+use Plenty\Plugin\Http\Response;
 
 /**
- * Stufe 1: Suchindex aller im Shop sichtbaren Varianten.
- * Die Webshop-Suche von Plenty wendet Sichtbarkeit, Mandant und Sprache selbst an,
- * der Index enthaelt also nur, was ein Kunde auch sehen kann.
+ * Suchindex aller im Shop sichtbaren Varianten.
+ *
+ * Der Aufbau dauert gemessen ~45 s (05.10.2026, ~3.900 Varianten) und passt nicht in den
+ * CachingRepository (Plugins: max. 512 Byte je Wert). Deshalb: Neuaufbau nur ueber
+ * /rebuild mit Schluessel, Ergebnis als Datei im Plugin-Speicher; /index liefert nur aus.
  */
 class IndexController extends Controller
 {
-    const CACHE_KEY      = 'osvsuche_index_v1';
-    const CACHE_MINUTES  = 60;
-    const PAGE_SIZE      = 100;
-    const MAX_PAGES      = 80; // Sicherung: hoechstens 8.000 Varianten
+    const PLUGIN     = 'OSVSuche';
+    const FILE_KEY   = 'suchindex.json';
+    const PAGE_SIZE  = 100;
+    const MAX_PAGES  = 80; // Sicherung: hoechstens 8.000 Varianten
 
-    public function index(Request $request, CachingRepository $cache)
+    public function index(Response $response)
     {
+        /** @var StorageRepositoryContract $storage */
+        $storage = pluginApp(StorageRepositoryContract::class);
+        if (!$storage->doesObjectExist(self::PLUGIN, self::FILE_KEY)) {
+            return $response->make('{"_meta":{"fehlt":true},"docs":[]}', 200, ['Content-Type' => 'application/json; charset=utf-8']);
+        }
+        $object = $storage->getObject(self::PLUGIN, self::FILE_KEY);
+        return $response->make((string)$object->body, 200, [
+            'Content-Type'  => 'application/json; charset=utf-8',
+            'Cache-Control' => 'public, max-age=600',
+        ]);
+    }
+
+    public function rebuild(Request $request, ConfigRepository $config)
+    {
+        $token = trim((string)$config->get(self::PLUGIN . '.rebuildToken'));
+        if ($token === '' || $request->get('token', '') !== $token) {
+            return ['ok' => false, 'fehler' => 'Schlüssel fehlt oder falsch'];
+        }
+
         /** @var ItemSearchService $searchService */
         $searchService = pluginApp(ItemSearchService::class);
-
-        $refresh = $request->get('refresh', '') === '1';
-        if (!$refresh) {
-            $cached = $cache->get(self::CACHE_KEY);
-            if (is_array($cached)) {
-                $cached['_meta']['ausCache'] = true;
-                return $cached;
-            }
-        }
 
         $start = microtime(true);
         $docs = [];
@@ -53,21 +67,23 @@ class IndexController extends Controller
             $page++;
         } while (count($docs) < $total && $page <= self::MAX_PAGES && !empty($result['documents']));
 
-        $data = [
-            '_meta' => [
-                'erzeugt'       => date('c'),
-                'anzahl'        => count($docs),
-                'gesamtLautPlenty' => $total,
-                'seiten'        => count($pageTimes),
-                'dauerMs'       => (int)round((microtime(true) - $start) * 1000),
-                'seitenMs'      => $pageTimes,
-                'ausCache'      => false,
-            ],
-            'docs' => $docs,
+        $meta = [
+            'erzeugt'          => date('c'),
+            'anzahl'           => count($docs),
+            'gesamtLautPlenty' => $total,
+            'seiten'           => count($pageTimes),
+            'dauerMs'          => (int)round((microtime(true) - $start) * 1000),
+            'seitenMs'         => $pageTimes,
         ];
+        $body = json_encode(['_meta' => $meta, 'docs' => $docs], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-        $cache->put(self::CACHE_KEY, $data, self::CACHE_MINUTES);
-        return $data;
+        /** @var StorageRepositoryContract $storage */
+        $storage = pluginApp(StorageRepositoryContract::class);
+        $storage->uploadObject(self::PLUGIN, self::FILE_KEY, $body);
+
+        $meta['bytes'] = strlen($body);
+        $meta['ok'] = true;
+        return $meta;
     }
 
     private function toDoc(array $d): array

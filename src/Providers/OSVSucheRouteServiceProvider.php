@@ -11,8 +11,10 @@ class OSVSucheRouteServiceProvider extends RouteServiceProvider
     public function map(Router $router, ApiRouter $apiRouter)
     {
         $apiRouter->version(['v1'], ['namespace' => 'OSVSuche\Controllers'], function ($apiRouter) {
-            // Oeffentlich lesbar, liefert nur, was der Shop ohnehin anzeigt
+            // Liefert den gespeicherten Index aus, baut nie selbst (schnell, oeffentlich)
             $apiRouter->get('osv-suche/index', 'IndexController@index');
+            // Baut den Index neu und speichert ihn, nur mit Schluessel aus der Plugin-Konfiguration
+            $apiRouter->get('osv-suche/rebuild', 'IndexController@rebuild');
         });
     }
 }

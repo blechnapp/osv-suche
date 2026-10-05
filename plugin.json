@@ -2,10 +2,10 @@
   "name": "OSVSuche",
   "namespace": "OSVSuche",
   "type": "general",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "proprietary",
   "author": "OSV",
-  "shortDescription": "Eigene Shop-Suche (Stufe 1: Suchindex als JSON unter /rest/osv-suche/index).",
+  "shortDescription": "Eigene Shop-Suche (Stufe 1: Suchindex unter /rest/osv-suche/index, Neuaufbau über /rest/osv-suche/rebuild).",
   "description": "Stellt einen Suchindex aller im Shop sichtbaren Varianten bereit. Stufe 1: nur der Index, keine Anzeige im Shop.",
   "categories": ["3527"],
   "require": {

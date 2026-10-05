@@ -1,0 +1,16 @@
+{
+  "formatVersion": 1,
+  "menu": {
+    "Suchindex": {
+      "label": "Suchindex",
+      "formFields": {
+        "rebuildToken": {
+          "type": "text",
+          "required": false,
+          "label": "Schlüssel für den Neuaufbau des Suchindex (/rest/osv-suche/rebuild?token=…). Leer = Neuaufbau gesperrt.",
+          "options": { "defaultValue": "" }
+        }
+      }
+    }
+  }
+}
