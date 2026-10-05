@@ -1,0 +1,19 @@
+{
+  "name": "OSVSuche",
+  "namespace": "OSVSuche",
+  "type": "general",
+  "version": "0.1.0",
+  "license": "proprietary",
+  "author": "OSV",
+  "shortDescription": "Eigene Shop-Suche (Stufe 1: Suchindex als JSON unter /rest/osv-suche/index).",
+  "description": "Stellt einen Suchindex aller im Shop sichtbaren Varianten bereit. Stufe 1: nur der Index, keine Anzeige im Shop.",
+  "categories": ["3527"],
+  "require": {
+    "IO": ">=5.0.0",
+    "Ceres": ">=5.0.0"
+  },
+  "serviceProvider": "OSVSuche\\Providers\\OSVSucheServiceProvider",
+  "dependencies": {},
+  "javaScriptFiles": [],
+  "runOnBuild": []
+}
