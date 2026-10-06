@@ -21,8 +21,8 @@ class SuchergebnisseWidget extends BaseWidget
         return WidgetDataFactory::make('OSVSuche::SuchergebnisseWidget')
             ->withLabel('OSV Suchergebnisse')
             ->withPreviewImageUrl('/images/widgets/item-grid.svg')
-            ->withType(WidgetTypes::ITEM_SEARCH)
-            ->withCategory(WidgetTypes::ITEM_SEARCH)
+            ->withType(WidgetTypes::CATEGORY_ITEM)
+            ->withCategory(WidgetTypes::CATEGORY_ITEM)
             ->withPosition(100)
             ->toArray();
     }
