@@ -2091,9 +2091,14 @@
     if (bekannt(w) || w.length < 5) return null;
     var max = w.length >= 12 ? 3 : (w.length >= 9 ? 2 : 1), best = null, bd = 99, bl = 99, bf = 0;
     for (var v in VOCAB) {
-      var ld = Math.abs(v.length - w.length);
-      if (ld > 2 || v.slice(0, 2) !== w.slice(0, 2)) continue;
-      var dd = dl(w, v); if (dd > max) continue;
+      if (v.slice(0, 2) !== w.slice(0, 2)) continue;
+      var ld = Math.abs(v.length - w.length), dd = ld > 2 ? 99 : dl(w, v);
+      if (v.length >= w.length) {
+        // Wortanfang mit Tippfehler ("herrenhu" -> "herrnhut"): gegen gleich lange Anfaenge vergleichen,
+        // bei gleichem Abstand gewinnt das kuerzere Wort ("nussknacker" vor "nussknackerwerkstatt")
+        for (var k = -1; k <= 1; k++) { var pre = v.slice(0, w.length + k); if (pre.length >= 4) { var dp = dl(w, pre), lp = (v.length - w.length) / 100; if (dp < dd || (dp === dd && lp < ld)) { dd = dp; ld = lp; } } }
+      }
+      if (dd > max) continue;
       if (dd < bd || (dd === bd && (ld < bl || (ld === bl && VFREQ[v] > bf)))) { best = v; bd = dd; bl = ld; bf = VFREQ[v]; }
     }
     return best;
@@ -2206,6 +2211,15 @@
       r.forEach(function (x) { if (hit[x.id]) x.score *= 1.15; });
       r.sort(function (a, b) { return b.score - a.score; });
     }
+    var woerter = tokenize(q).map(function (t) { return stem(norm(t)); }).filter(function (w) { return w.length >= 4 && !HERKUNFT[w]; });
+    if (woerter.length && r.length) {
+      r.forEach(function (x) {
+        var d = st.byId[String(x.id)]; if (!d) return;
+        var name = norm((d.n || "") + " " + (d.v || ""));
+        if (woerter.every(function (w) { return name.indexOf(w) >= 0; })) x.score *= 1.3;
+      });
+      r.sort(function (a, b) { return b.score - a.score; });
+    }
     var seen = {}, out = [];
     r.forEach(function (x) { var d = st.byId[String(x.id)]; if (!d) return; if (!seen[d.i]) { seen[d.i] = { d: d, n: 1 }; out.push(seen[d.i]); } else seen[d.i].n++; });
     return out;
@@ -2242,7 +2256,7 @@
     } else if (!k) items = suchen(q);
     if (!items.length) {
       // Wer gerade weitertippt ("herrenu" nach "herren"), behaelt die letzte Liste; sonst Ceres-Rueckfall
-      if (st.letzteQ && q.indexOf(st.letzteQ) === 0 && q.length - st.letzteQ.length <= 3 && st.panel && st.panel.style.display === "block") return;
+      if (st.letzteQ && (q.indexOf(st.letzteQ) === 0 || st.letzteQ.indexOf(q) === 0) && st.panel && st.panel.style.display === "block") return;
       schliessen(); return;
     }
     st.letzteQ = q;
@@ -2321,5 +2335,5 @@
     if (st.panel && st.panel.style.display === "block" && !st.panel.contains(ev.target) && !istSuchfeld(ev.target)) schliessen();
   }, true);
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.2" };
+  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.3" };
 })();

@@ -19,7 +19,7 @@
           "type": "text",
           "required": false,
           "label": "Synonyme: Suchwort=gemeint, getrennt mit ;",
-          "options": { "defaultValue": "lichterbogen=schwibbogen;lichtbogen=schwibbogen;fensterbogen=schwibbogen;räucherfigur=räuchermann;herrenhuter=herrnhuter;trabbi=trabi;räucherhäuschen=räucherhaus;nussknackerfigur=nussknacker;weihnachtspyramide=pyramide;spieluhr=spieldose;spieluhren=spieldose;huhn=hühner;schorsch=schorchy;schwippbogen=schwibbogen;schwipbogen=schwibbogen;schwibbbogen=schwibbogen;hängend=hängepyramide;hängende=hängepyramide;unbestückt=leer;unbestueckt=leer" }
+          "options": { "defaultValue": "lichterbogen=schwibbogen;lichtbogen=schwibbogen;fensterbogen=schwibbogen;räucherfigur=räuchermann;herrenhuter=herrnhuter;trabbi=trabi;räucherhäuschen=räucherhaus;nussknackerfigur=nussknacker;weihnachtspyramide=pyramide;spieluhr=spieldose;spieluhren=spieldose;huhn=hühner;schorsch=schorchy;schwippbogen=schwibbogen;schwipbogen=schwibbogen;schwibbbogen=schwibbogen;hängend=hängepyramide;hängende=hängepyramide;unbestückt=leer;unbestueckt=leer;leuchterbogen=schwibbogen" }
         },
         "eigenmarken": {
           "type": "text",
