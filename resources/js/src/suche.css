@@ -28,6 +28,12 @@ body.osvs-ergebnis-aktiv .widget-item-grid:not(.osvs-ergebnis .widget-item-grid)
 .osvs-filter summary{font-weight:600;cursor:pointer}
 .osvs-f-gruppe{margin:10px 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .osvs-f-titel{font-weight:600;min-width:90px}
+.osvs-kats{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.osvs-kat{border:1px solid #ccc;background:#fff;border-radius:4px;padding:6px 12px;font-size:14px;cursor:pointer}
+.osvs-kat small{color:#6b7280;margin-left:4px}
+.osvs-kat-an{background:#0b2a5b;color:#fff;border-color:#0b2a5b}
+.osvs-kat-an small{color:#dbe3f0}
+.osvs-f-tipp{font-size:13px;color:#6b7280;margin:6px 0 0}
 .osvs-chip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #ddd;border-radius:16px;padding:3px 10px;margin:0;font-size:13px;cursor:pointer}
 .osvs-chip small{color:#6b7280}
 .osvs-von,.osvs-bis{width:110px;display:inline-block}

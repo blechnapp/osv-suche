@@ -2020,6 +2020,7 @@
 (function () {
   "use strict";
   if (window.OSVSuche) return;
+  (function () { var st = document.createElement("style"); st.id = "osvs-css"; st.textContent = "/* Ceres-Vorschlaege ausblenden, sobald unsere Suche bereit ist; nur bei 'nichts gefunden' (osvs-ceres) zeigen */body.osvs-bereit:not(.osvs-ceres) .autocomplete-suggestions{display:none!important}.osvs-panel{display:none;position:absolute;top:100%;left:0;right:0;z-index:1100;background:#fff;border:1px solid #e3e0d9;border-radius:0 0 6px 6px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:75vh;overflow-y:auto;text-align:left}.osvs-hinweis{padding:8px 12px;font-size:13px;background:#fffbeb;color:#7c4a03;border-bottom:1px solid #f0e6c8}.osvs-hit{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0ede6;color:#1d2433;text-decoration:none}.osvs-hit:hover,.osvs-hit.osvs-sel{background:#f7f5f0;text-decoration:none;color:#1d2433}.osvs-hit img{width:48px;height:48px;object-fit:contain;flex:0 0 48px;background:#fff}.osvs-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.3}.osvs-n{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis}.osvs-v{font-size:12px;color:#6b7280}.osvs-p{flex:0 0 auto;font-weight:600;font-size:14px;white-space:nowrap}.osvs-uvp{color:#9ca3af;font-weight:400;margin-right:4px}.osvs-panel mark{background:#fde68a;padding:0;color:inherit}.osvs-mehr{background:#f7f5f0}.osvs-alle{display:block;padding:10px 12px;font-size:14px;color:#1f3a5f;font-weight:600}@media (max-width:767px){.osvs-panel{border-radius:6px;max-height:65vh}.osvs-hit img{width:44px;height:44px;flex-basis:44px}.osvs-n{font-size:14px;white-space:normal}.osvs-txt{word-break:normal;hyphens:auto}}/* Ergebnisseite: Plentys Raster, Toolbar, Filter und Seitenblaettern ausblenden, solange unser Widget Treffer zeigt */body.osvs-ergebnis-aktiv .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),body.osvs-ergebnis-aktiv .widget-pagination,body.osvs-ergebnis-aktiv .widget-toolbar,body.osvs-ergebnis-aktiv .widget-selected-filter,body.osvs-ergebnis-aktiv .widget-filter-base,body.osvs-ergebnis-aktiv .widget-items-per-page,body.osvs-ergebnis-aktiv .widget-item-sorting{display:none!important}.osvs-ergebnis-zahl{font-weight:600;margin:0 0 8px}.osvs-ergebnis .osvs-hinweis{display:inline-block;border-radius:4px;margin:0 0 12px}.osvs-ergebnis-fuss{margin:16px 0 24px}.osvs-f-zeile{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}.osvs-f-zeile .osvs-ergebnis-zahl{margin:0}.osvs-sort{width:auto;min-width:200px}.osvs-filter{background:#f2f2f2;padding:10px 14px;margin:0 0 16px;border-radius:4px}.osvs-filter summary{font-weight:600;cursor:pointer}.osvs-f-gruppe{margin:10px 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px}.osvs-f-titel{font-weight:600;min-width:90px}.osvs-kats{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}.osvs-kat{border:1px solid #ccc;background:#fff;border-radius:4px;padding:6px 12px;font-size:14px;cursor:pointer}.osvs-kat small{color:#6b7280;margin-left:4px}.osvs-kat-an{background:#0b2a5b;color:#fff;border-color:#0b2a5b}.osvs-kat-an small{color:#dbe3f0}.osvs-f-tipp{font-size:13px;color:#6b7280;margin:6px 0 0}.osvs-chip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #ddd;border-radius:16px;padding:3px 10px;margin:0;font-size:13px;cursor:pointer}.osvs-chip small{color:#6b7280}.osvs-von,.osvs-bis{width:110px;display:inline-block}.osvs-ansehen{display:block;width:100%;margin:8px 0}"; document.head.appendChild(st); })();
   var INDEX_URL = "/rest/osv-suche/index", PREIS_URL = "/rest/osv-suche/preise", SUCH_URL = "/artikelsuchergebnisse/?query=";
   var CACHE_KEY = "osvsuche_index_v1", CACHE_MS = 60 * 60 * 1000, MAX = 8;
   var st = { laden: null, ms: null, docs: null, byId: null, cfg: null, panel: null, input: null, sel: -1, items: [], q: "" };
@@ -2403,6 +2404,8 @@
     }).catch(function () {});
   }
   function preisZahl(t) { var m = String(t || "").replace(/\./g, "").replace(",", ".").match(/[\d.]+/); return m ? parseFloat(m[0]) : 0; }
+  // Wie in der PWA (filters.config.ts): Sammelkategorien zaehlen nicht als "passende Kategorie"
+  var KAT_AUSNAHMEN = { 290: 1, 261: 1 }, KAT_MAX = 6;
   function ergebnisseite() {
     var el = document.querySelector("[data-osvs-ergebnis]"); if (!el) return;
     var q = (new URLSearchParams(window.location.search).get("query") || "").trim();
@@ -2414,64 +2417,97 @@
         if (alle.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
       } else if (!k) alle = suchen(q);
       if (!alle.length) { el.style.display = "none"; return; } // Plentys Seite bleibt stehen
-      alle.forEach(function (x, i) { x.rang = i; x.preis = preisZahl(x.d.p); x.kat = (x.d.kat || "").split(" » ").pop() || "Sonstiges"; });
-      var f = { kat: {}, her: {}, von: "", bis: "", sort: "rel" };
+      alle.forEach(function (x, i) { x.rang = i; x.preis = preisZahl(x.d.p); });
+      // Passende Kategorien: Standardkategorie je Treffer, nach Anzahl, ohne Sammelkategorien
+      var katZahl = {}, katName = {};
+      alle.forEach(function (x) { var id = x.d.k; if (!id || KAT_AUSNAHMEN[id]) return; katZahl[id] = (katZahl[id] || 0) + 1; katName[id] = (x.d.kat || "").split(" » ").pop(); });
+      var kats = Object.keys(katZahl).sort(function (a, b) { return katZahl[b] - katZahl[a]; }).slice(0, KAT_MAX);
+      var f = { kat: 0, her: {}, at: {}, von: "", bis: "", lief: false, sort: "rel" };
       var kopf = el.querySelector(".osvs-ergebnis-kopf"), liste = el.querySelector(".osvs-ergebnis-liste"), fuss = el.querySelector(".osvs-ergebnis-fuss");
-      function zaehle(feld) {
-        var c = {}; alle.forEach(function (x) { var v = feld === "kat" ? x.kat : (x.d.h || ""); if (v) c[v] = (c[v] || 0) + 1; });
-        return Object.keys(c).sort(function (a, b) { return c[b] - c[a]; }).map(function (v) { return [v, c[v]]; });
-      }
-      var kats = zaehle("kat"), hers = zaehle("her");
-      function chips(name, werte, max) {
-        return '<div class="osvs-f-gruppe"><span class="osvs-f-titel">' + name + '</span>' + werte.slice(0, max).map(function (w) {
-          return '<label class="osvs-chip"><input type="checkbox" data-f="' + (name === "Kategorie" ? "kat" : "her") + '" value="' + esc(w[0]) + '"> ' + esc(w[0]) + " <small>(" + w[1] + ")</small></label>";
-        }).join("") + "</div>";
-      }
-      kopf.innerHTML = '<div class="osvs-f-zeile"><p class="osvs-ergebnis-zahl"></p>' +
-        '<select class="custom-select osvs-sort"><option value="rel">Relevanz</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="az">Name A–Z</option></select></div>' +
-        (hinweis ? '<p class="osvs-hinweis">' + hinweis + "</p>" : "") +
-        '<details class="osvs-filter"' + (window.innerWidth >= 768 ? " open" : "") + '><summary>Filter</summary>' +
-        chips("Kategorie", kats, 12) + (hers.length > 1 ? chips("Hersteller", hers, 10) : "") +
-        '<div class="osvs-f-gruppe"><span class="osvs-f-titel">Preis</span><input type="number" min="0" class="form-control osvs-von" placeholder="von €"> – <input type="number" min="0" class="form-control osvs-bis" placeholder="bis €"></div>' +
-        '<button type="button" class="btn btn-link osvs-reset">Filter zurücksetzen</button></details>';
       var treffer = [], n = 0;
+      function basis() { return f.kat ? alle.filter(function (x) { return String(x.d.k) === String(f.kat); }) : alle; }
+      function zaehlen(liste2, fn) {
+        var c = {}; liste2.forEach(function (x) { (fn(x) || []).forEach(function (v) { if (v) c[v] = (c[v] || 0) + 1; }); });
+        return Object.keys(c).sort(function (a, b) { return c[b] - c[a] || a.localeCompare(b, "de", { numeric: true }); }).map(function (v) { return [v, c[v]]; });
+      }
+      function chip(gruppe, wert, anzahl, an) {
+        return '<label class="osvs-chip"><input type="checkbox" data-g="' + esc(gruppe) + '" value="' + esc(wert) + '"' + (an ? " checked" : "") + "> " + esc(wert) + " <small>(" + anzahl + ")</small></label>";
+      }
+      function zeichneKopf() {
+        var b = basis(), mitMerkmalen = f.kat || kats.length <= 1;
+        var html = '<div class="osvs-f-zeile"><p class="osvs-ergebnis-zahl"></p>' +
+          '<select class="custom-select osvs-sort"><option value="rel">Relevanz</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="az">Name A–Z</option></select></div>' +
+          (hinweis ? '<p class="osvs-hinweis">' + hinweis + "</p>" : "");
+        if (kats.length > 1) {
+          html += '<div class="osvs-kats"><span class="osvs-f-titel">Passende Kategorien</span>' +
+            '<button type="button" class="osvs-kat' + (!f.kat ? " osvs-kat-an" : "") + '" data-kat="0">Alle <small>' + alle.length + "</small></button>" +
+            kats.map(function (id) { return '<button type="button" class="osvs-kat' + (String(f.kat) === id ? " osvs-kat-an" : "") + '" data-kat="' + id + '">' + esc(katName[id]) + " <small>" + katZahl[id] + "</small></button>"; }).join("") + "</div>";
+        }
+        var hers = zaehlen(b, function (x) { return [x.d.h]; });
+        html += '<details class="osvs-filter"' + (window.innerWidth >= 768 ? " open" : "") + "><summary>Filter</summary>";
+        // Merkmale (Groesse, Farbe …) nur in einer Kategorie, wie in der PWA
+        if (mitMerkmalen) {
+          var namen = zaehlen(b, function (x) { return (x.d.at || []).map(function (p) { return p[0]; }); });
+          namen.forEach(function (nm) {
+            var werte = zaehlen(b, function (x) { return (x.d.at || []).filter(function (p) { return p[0] === nm[0]; }).map(function (p) { return p[1]; }); });
+            if (werte.length < 2) return;
+            html += '<div class="osvs-f-gruppe"><span class="osvs-f-titel">' + esc(nm[0]) + "</span>" + werte.slice(0, 16).map(function (w) { return chip("at:" + nm[0], w[0], w[1], f.at[nm[0] + "\u0001" + w[0]]); }).join("") + "</div>";
+          });
+        }
+        if (hers.length > 1) html += '<div class="osvs-f-gruppe"><span class="osvs-f-titel">Hersteller</span>' + hers.slice(0, 12).map(function (w) { return chip("her", w[0], w[1], f.her[w[0]]); }).join("") + "</div>";
+        html += '<div class="osvs-f-gruppe"><span class="osvs-f-titel">Preis</span><input type="number" min="0" class="form-control osvs-von" placeholder="von €" value="' + esc(f.von) + '"> – <input type="number" min="0" class="form-control osvs-bis" placeholder="bis €" value="' + esc(f.bis) + '"></div>' +
+          '<div class="osvs-f-gruppe"><label class="osvs-chip"><input type="checkbox" class="osvs-lief"' + (f.lief ? " checked" : "") + "> Nur sofort lieferbar</label></div>" +
+          (!mitMerkmalen ? '<p class="osvs-f-tipp">Weitere Filter wie Größe oder Farbe erscheinen, wenn oben eine Kategorie gewählt ist.</p>' : "") +
+          '<button type="button" class="btn btn-link osvs-reset">Filter zurücksetzen</button></details>';
+        kopf.innerHTML = html;
+        kopf.querySelector(".osvs-sort").value = f.sort;
+      }
       function anwenden() {
-        var ka = Object.keys(f.kat), he = Object.keys(f.her), von = parseFloat(f.von), bis = parseFloat(f.bis);
-        treffer = alle.filter(function (x) {
-          return (!ka.length || f.kat[x.kat]) && (!he.length || f.her[x.d.h]) && (isNaN(von) || x.preis >= von) && (isNaN(bis) || x.preis <= bis);
+        var he = Object.keys(f.her), atKeys = Object.keys(f.at), von = parseFloat(f.von), bis = parseFloat(f.bis);
+        var atGruppen = {}; atKeys.forEach(function (key) { var t = key.split("\u0001"); (atGruppen[t[0]] = atGruppen[t[0]] || {})[t[1]] = 1; });
+        treffer = basis().filter(function (x) {
+          if (he.length && !f.her[x.d.h]) return false;
+          if (!isNaN(von) && x.preis < von) return false;
+          if (!isNaN(bis) && x.preis > bis) return false;
+          if (f.lief && !x.d.ok) return false;
+          for (var nm in atGruppen) { if (!(x.d.at || []).some(function (p) { return p[0] === nm && atGruppen[nm][p[1]]; })) return false; }
+          return true;
         });
         var cmp = { rel: function (a, b) { return a.rang - b.rang; }, pa: function (a, b) { return a.preis - b.preis; }, pd: function (a, b) { return b.preis - a.preis; }, az: function (a, b) { return a.d.n.localeCompare(b.d.n, "de"); } }[f.sort];
         treffer.sort(cmp);
-        kopf.querySelector(".osvs-ergebnis-zahl").textContent = treffer.length + " Artikel für „" + q + "“";
+        kopf.querySelector(".osvs-ergebnis-zahl").textContent = treffer.length + " Artikel für „" + q + "“" + (f.kat ? " in " + katName[f.kat] : "");
         liste.innerHTML = ""; n = 0; mehr();
       }
       function mehr() {
         var teil = treffer.slice(n, n + SEITE); n += teil.length;
         liste.insertAdjacentHTML("beforeend", teil.map(function (x) { return kachel(x.d); }).join(""));
         if (teil.length) seitePreise(liste, teil);
-        fuss.innerHTML = n < treffer.length ? '<button type="button" class="btn btn-primary osvs-weiter">Weitere Artikel anzeigen (' + (treffer.length - n) + ")</button>" : "";
+        fuss.innerHTML = n < treffer.length ? '<button type="button" class="btn btn-primary osvs-weiter">Weitere Artikel anzeigen (' + (treffer.length - n) + ")</button>" :
+          (!treffer.length ? '<p>Keine Artikel mit diesen Filtern. <button type="button" class="btn btn-link osvs-reset">Filter zurücksetzen</button></p>' : "");
       }
+      function zuruecksetzen(alles) { f.her = {}; f.at = {}; f.von = ""; f.bis = ""; f.lief = false; if (alles) f.kat = 0; }
       kopf.addEventListener("change", function (ev) {
-        var t = ev.target;
-        if (t.dataset && t.dataset.f) { if (t.checked) f[t.dataset.f][t.value] = 1; else delete f[t.dataset.f][t.value]; }
+        var t = ev.target, g = t.dataset && t.dataset.g;
+        if (g === "her") { if (t.checked) f.her[t.value] = 1; else delete f.her[t.value]; }
+        else if (g && g.indexOf("at:") === 0) { var key = g.slice(3) + "\u0001" + t.value; if (t.checked) f.at[key] = 1; else delete f.at[key]; }
         else if (t.classList.contains("osvs-sort")) f.sort = t.value;
         else if (t.classList.contains("osvs-von")) f.von = t.value;
         else if (t.classList.contains("osvs-bis")) f.bis = t.value;
+        else if (t.classList.contains("osvs-lief")) f.lief = t.checked;
         anwenden();
       });
-      kopf.addEventListener("click", function (ev) {
-        if (!ev.target.closest(".osvs-reset")) return;
-        f.kat = {}; f.her = {}; f.von = ""; f.bis = "";
-        [].forEach.call(kopf.querySelectorAll("input"), function (i) { if (i.type === "checkbox") i.checked = false; else i.value = ""; });
-        anwenden();
+      el.addEventListener("click", function (ev) {
+        var kb = ev.target.closest(".osvs-kat");
+        if (kb) { f.kat = Number(kb.dataset.kat) || 0; zuruecksetzen(false); f.her = {}; zeichneKopf(); anwenden(); return; }
+        if (ev.target.closest(".osvs-reset")) { zuruecksetzen(false); zeichneKopf(); anwenden(); return; }
+        if (ev.target.closest(".osvs-weiter")) mehr();
       });
-      fuss.addEventListener("click", function (ev) { if (ev.target.closest(".osvs-weiter")) mehr(); });
       document.body.classList.add("osvs-ergebnis-aktiv");
       schliessen();
-      anwenden();
+      zeichneKopf(); anwenden();
     }).catch(function () { el.style.display = "none"; });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.5.2" };
+  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.6.0" };
 })();

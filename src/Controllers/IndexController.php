@@ -24,6 +24,7 @@ class IndexController extends Controller
     const FILE_KEY   = 'suchindex.json';
     const SALES_KEY  = 'verkauf.json';
     const MAX_IDS    = 24;
+    const VERSION    = '0.6.0';
 
     /** @var array Kategoriepfade je ID, beim Neuaufbau gefuellt */
     private $katCache = [];
@@ -253,10 +254,15 @@ class IndexController extends Controller
         $urlPath = $d['texts']['urlPath'] ?? '';
 
         $attributes = [];
+        $merkmale = [];
         foreach (($d['attributes'] ?? []) as $attribute) {
             $value = $attribute['value']['names']['name'] ?? '';
+            $name = $attribute['attribute']['names']['name'] ?? '';
             if ($value !== '') {
                 $attributes[] = $value;
+                if ($name !== '') {
+                    $merkmale[] = [$name, $value];
+                }
             }
         }
 
@@ -276,6 +282,13 @@ class IndexController extends Controller
             'p'   => $d['prices']['default']['price']['formatted'] ?? '',
             'av'  => (int)($d['variation']['availabilityId'] ?? 0),
             'ok'  => !empty($d['filter']['isSalable']),
+            'at'  => $merkmale,
         ];
+    }
+
+    /** Version des Plugins, damit die feste Vorlage im Shop immer das aktuelle Skript laedt */
+    public function version(Response $response)
+    {
+        return $response->make('{"v":"' . self::VERSION . '"}', 200, ['Content-Type' => 'application/json']);
     }
 }

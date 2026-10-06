@@ -29,3 +29,12 @@ ShopBuilder-Widget **OSV Suchergebnisse** auf die Seite „Artikelsuchergebnisse
 Es zeigt dieselben Treffer und dieselbe Reihenfolge wie die Sofort-Liste, als Kachelraster im Ceres-Stil, 24 je Schritt
 mit „Weitere Artikel anzeigen“, Preise live. Solange es Treffer zeigt, werden Plentys Raster, Toolbar, Filter und
 Seitenblättern ausgeblendet. Findet es nichts oder lädt der Index nicht, bleibt Plentys Seite unverändert.
+
+## Ab 0.6.0
+- Ergebnisseite wie in der PWA: „Passende Kategorien“ als Knöpfe (höchstens 6, ohne Sale und Neu im Shop).
+  Ohne gewählte Kategorie nur Preis, Hersteller, „Nur sofort lieferbar“; mit Kategorie zusätzlich deren Merkmale
+  (Größe, Farbe …) mit den Werten, die es dort gibt.
+- Die Vorlage im Shop ist ein fester Lader: Er fragt `/rest/osv-suche/version` und lädt das passende Skript.
+  Neue Versionen kommen dadurch ohne Neuspeichern der Container-Verknüpfung an.
+  **Beim Versionswechsel `IndexController::VERSION` mit hochzählen.** Das CSS steckt im Skript.
+- Der Index enthält die Merkmale je Variante (`at`). Nach dem ersten Bereitstellen einmal neu aufbauen.
