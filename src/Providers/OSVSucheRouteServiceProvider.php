@@ -15,6 +15,10 @@ class OSVSucheRouteServiceProvider extends RouteServiceProvider
             $apiRouter->get('osv-suche/index', 'IndexController@index');
             // Baut den Index neu und speichert ihn, nur mit Schluessel aus der Plugin-Konfiguration
             $apiRouter->get('osv-suche/rebuild', 'IndexController@rebuild');
+            // Aktuelle Preise und Verfuegbarkeit fuer wenige Varianten (?ids=1,2,3), schlank
+            $apiRouter->get('osv-suche/preise', 'IndexController@preise');
+            // Verkaufszahlen je Variantennummer speichern (JSON im Body), nur mit Schluessel
+            $apiRouter->post('osv-suche/verkauf', 'IndexController@verkauf');
         });
     }
 }

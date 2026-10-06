@@ -7,8 +7,61 @@
         "rebuildToken": {
           "type": "text",
           "required": false,
-          "label": "Schlüssel für den Neuaufbau des Suchindex (/rest/osv-suche/rebuild?token=…). Leer = Neuaufbau gesperrt.",
+          "label": "Schlüssel für Neuaufbau und Verkaufszahlen (/rest/osv-suche/rebuild?token=…). Leer = gesperrt.",
           "options": { "defaultValue": "" }
+        }
+      }
+    },
+    "Suchregeln": {
+      "label": "Suchregeln",
+      "formFields": {
+        "synonyme": {
+          "type": "text",
+          "required": false,
+          "label": "Synonyme: Suchwort=gemeint, getrennt mit ;",
+          "options": { "defaultValue": "lichterbogen=schwibbogen;lichtbogen=schwibbogen;fensterbogen=schwibbogen;räucherfigur=räuchermann;herrenhuter=herrnhuter;trabbi=trabi;räucherhäuschen=räucherhaus;nussknackerfigur=nussknacker;weihnachtspyramide=pyramide;spieluhr=spieldose;spieluhren=spieldose;huhn=hühner;schorsch=schorchy;schwippbogen=schwibbogen;schwipbogen=schwibbogen;schwibbbogen=schwibbogen;hängend=hängepyramide;hängende=hängepyramide;unbestückt=leer;unbestueckt=leer" }
+        },
+        "eigenmarken": {
+          "type": "text",
+          "required": false,
+          "label": "Eigenmarken (Herstellernamen, getrennt mit ;)",
+          "options": { "defaultValue": "Seiffener Volkskunst eG;Emil A. Schalling KG" }
+        },
+        "eigenmarkenBonus": {
+          "type": "text",
+          "required": false,
+          "label": "Eigenmarken-Bonus in Prozent (0–100)",
+          "options": { "defaultValue": "25" }
+        },
+        "verkaufsBonus": {
+          "type": "text",
+          "required": false,
+          "label": "Verkaufsbonus in Prozent (0–200)",
+          "options": { "defaultValue": "80" }
+        },
+        "abwerten": {
+          "type": "text",
+          "required": false,
+          "label": "Abwerten: Kategorie enthält (getrennt mit ;)",
+          "options": { "defaultValue": "Servietten;Ersatzteile;Zubehör;Sale" }
+        },
+        "abwertFaktor": {
+          "type": "text",
+          "required": false,
+          "label": "Abwerten: Faktor in Prozent (10–100, 30 = stark nach hinten)",
+          "options": { "defaultValue": "30" }
+        },
+        "herkunft": {
+          "type": "text",
+          "required": false,
+          "label": "Herkunftswörter, nur leichter Bonus (getrennt mit ;)",
+          "options": { "defaultValue": "seiffen;seifen;erzgebirge;erzgebirgisch;erzgebirgische;erzgebirgs;sachsen;sächsisch;handgemacht;handarbeit;holz" }
+        },
+        "toleranz": {
+          "type": "text",
+          "required": false,
+          "label": "Tippfehler-Toleranz (0, 1 oder 2)",
+          "options": { "defaultValue": "2" }
         }
       }
     }

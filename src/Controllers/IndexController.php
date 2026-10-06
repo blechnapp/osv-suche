@@ -21,6 +21,8 @@ class IndexController extends Controller
 {
     const PLUGIN     = 'OSVSuche';
     const FILE_KEY   = 'suchindex.json';
+    const SALES_KEY  = 'verkauf.json';
+    const MAX_IDS    = 24;
     const PAGE_SIZE  = 100;
     const MAX_PAGES  = 80; // Sicherung: hoechstens 8.000 Varianten
 
@@ -40,9 +42,15 @@ class IndexController extends Controller
 
     public function rebuild(Request $request, ConfigRepository $config)
     {
-        $token = trim((string)$config->get(self::PLUGIN . '.rebuildToken'));
-        if ($token === '' || $request->get('token', '') !== $token) {
+        if (!$this->tokenOk($request, $config)) {
             return ['ok' => false, 'fehler' => 'Schlüssel fehlt oder falsch'];
+        }
+
+        /** @var StorageRepositoryContract $storage */
+        $storage = pluginApp(StorageRepositoryContract::class);
+        $sales = [];
+        if ($storage->doesObjectExist(self::PLUGIN, self::SALES_KEY)) {
+            $sales = json_decode((string)$storage->getObject(self::PLUGIN, self::SALES_KEY)->body, true) ?: [];
         }
 
         /** @var ItemSearchService $searchService */
@@ -61,7 +69,9 @@ class IndexController extends Controller
             $result = $searchService->getResult($factory);
             $total = (int)($result['total'] ?? 0);
             foreach (($result['documents'] ?? []) as $document) {
-                $docs[] = $this->toDoc($document['data'] ?? []);
+                $doc = $this->toDoc($document['data'] ?? []);
+                $doc['vk'] = isset($sales[$doc['nr']]) ? round((float)$sales[$doc['nr']], 1) : 0;
+                $docs[] = $doc;
             }
             $pageTimes[] = (int)round((microtime(true) - $t0) * 1000);
             $page++;
@@ -74,16 +84,131 @@ class IndexController extends Controller
             'seiten'           => count($pageTimes),
             'dauerMs'          => (int)round((microtime(true) - $start) * 1000),
             'seitenMs'         => $pageTimes,
+            'mitVerkauf'       => $this->zaehleVerkauf($docs),
         ];
-        $body = json_encode(['_meta' => $meta, 'docs' => $docs], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $body = json_encode(['_meta' => $meta, '_cfg' => $this->regeln($config), 'docs' => $docs], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-        /** @var StorageRepositoryContract $storage */
-        $storage = pluginApp(StorageRepositoryContract::class);
         $storage->uploadObject(self::PLUGIN, self::FILE_KEY, $body);
 
         $meta['bytes'] = strlen($body);
         $meta['ok'] = true;
         return $meta;
+    }
+
+    /**
+     * Aktuelle Preise und Verfuegbarkeit fuer die angezeigten Treffer.
+     * Liefert nur die noetigen Felder, damit die Antwort klein bleibt.
+     */
+    public function preise(Request $request, Response $response)
+    {
+        $start = microtime(true);
+        $ids = [];
+        foreach (explode(',', (string)$request->get('ids', '')) as $teil) {
+            $id = (int)trim($teil);
+            if ($id > 0 && !in_array($id, $ids, true) && count($ids) < self::MAX_IDS) {
+                $ids[] = $id;
+            }
+        }
+        $out = [];
+        if (count($ids)) {
+            /** @var ItemSearchService $searchService */
+            $searchService = pluginApp(ItemSearchService::class);
+            $factory = VariationList::getSearchFactory([
+                'variationIds' => $ids,
+                'itemsPerPage' => count($ids),
+            ]);
+            $result = $searchService->getResult($factory);
+            foreach (($result['documents'] ?? []) as $document) {
+                $d = $document['data'] ?? [];
+                $id = $d['variation']['id'] ?? 0;
+                $out[$id] = [
+                    'p'   => $d['prices']['default']['price']['formatted'] ?? '',
+                    'uvp' => $d['prices']['rrp']['price']['formatted'] ?? '',
+                    'gp'  => $d['prices']['default']['basePrice'] ?? '',
+                    'av'  => $d['variation']['availability']['names']['name'] ?? '',
+                    'avId'=> (int)($d['variation']['availabilityId'] ?? 0),
+                    'ok'  => !empty($d['filter']['isSalable']),
+                ];
+            }
+        }
+        $body = json_encode(['dauerMs' => (int)round((microtime(true) - $start) * 1000), 'preise' => (object)$out], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return $response->make($body, 200, ['Content-Type' => 'application/json; charset=utf-8']);
+    }
+
+    /**
+     * Verkaufszahlen je Variantennummer speichern: {"11202/1": 206.0, ...}
+     * Wirkt beim naechsten Neuaufbau des Index.
+     */
+    public function verkauf(Request $request, ConfigRepository $config)
+    {
+        if (!$this->tokenOk($request, $config)) {
+            return ['ok' => false, 'fehler' => 'Schlüssel fehlt oder falsch'];
+        }
+        $data = json_decode((string)$request->getContent(), true);
+        if (!is_array($data) || !count($data)) {
+            return ['ok' => false, 'fehler' => 'Keine Daten im Body'];
+        }
+        $clean = [];
+        foreach ($data as $nr => $wert) {
+            if (is_string($nr) && strlen($nr) <= 40 && is_numeric($wert)) {
+                $clean[$nr] = (float)$wert;
+            }
+        }
+        /** @var StorageRepositoryContract $storage */
+        $storage = pluginApp(StorageRepositoryContract::class);
+        $storage->uploadObject(self::PLUGIN, self::SALES_KEY, json_encode($clean, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        return ['ok' => true, 'anzahl' => count($clean), 'gespeichert' => date('c')];
+    }
+
+    private function tokenOk(Request $request, ConfigRepository $config): bool
+    {
+        $token = trim((string)$config->get(self::PLUGIN . '.rebuildToken'));
+        return $token !== '' && (string)$request->get('token', '') === $token;
+    }
+
+    /** Suchregeln aus der Plugin-Konfiguration, wandern mit dem Index in den Browser */
+    private function regeln(ConfigRepository $config): array
+    {
+        $syn = [];
+        foreach ($this->liste($config, 'synonyme') as $paar) {
+            $teile = explode('=', $paar, 2);
+            if (count($teile) === 2 && trim($teile[0]) !== '' && trim($teile[1]) !== '') {
+                $syn[trim($teile[0])] = trim($teile[1]);
+            }
+        }
+        return [
+            'synonyme'         => (object)$syn,
+            'eigenmarken'      => $this->liste($config, 'eigenmarken'),
+            'eigenmarkenBonus' => (int)$config->get(self::PLUGIN . '.eigenmarkenBonus', 25),
+            'verkaufsBonus'    => (int)$config->get(self::PLUGIN . '.verkaufsBonus', 80),
+            'abwerten'         => $this->liste($config, 'abwerten'),
+            'abwertFaktor'     => (int)$config->get(self::PLUGIN . '.abwertFaktor', 30),
+            'herkunft'         => $this->liste($config, 'herkunft'),
+            'toleranz'         => (int)$config->get(self::PLUGIN . '.toleranz', 2),
+        ];
+    }
+
+    private function liste(ConfigRepository $config, string $key): array
+    {
+        $out = [];
+        foreach (explode(';', (string)$config->get(self::PLUGIN . '.' . $key, '')) as $teil) {
+            $teil = trim($teil);
+            if ($teil !== '') {
+                $out[] = $teil;
+            }
+        }
+        return $out;
+    }
+
+    private function zaehleVerkauf(array $docs): int
+    {
+        $n = 0;
+        foreach ($docs as $doc) {
+            if (($doc['vk'] ?? 0) > 0) {
+                $n++;
+            }
+        }
+        return $n;
     }
 
     private function toDoc(array $d): array
@@ -114,8 +239,8 @@ class IndexController extends Controller
             'u'   => '/' . $urlPath . '_' . $itemId . '_' . $variationId . '/',
             'b'   => $image,
             'p'   => $d['prices']['default']['price']['formatted'] ?? '',
-            'm'   => !empty($d['variation']['isMain']),
-            'ok'  => ($d['variation']['availability']['mappedAvailability'] ?? '') === 'https://schema.org/InStock',
+            'av'  => (int)($d['variation']['availabilityId'] ?? 0),
+            'ok'  => !empty($d['filter']['isSalable']),
         ];
     }
 }
