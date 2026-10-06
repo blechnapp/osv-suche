@@ -1,0 +1,8 @@
+{% set customClass = widget.settings.customClass.mobile %}
+<div class="widget osvs-ergebnis{% if customClass | length > 0 %} {{ customClass }}{% endif %}" data-osvs-ergebnis>
+    <div class="osvs-ergebnis-kopf"></div>
+    <div class="widget widget-item-grid widget-primary item-vat-hidden">
+        <ul class="widget-inner row product-list grid osvs-ergebnis-liste"></ul>
+    </div>
+    <div class="osvs-ergebnis-fuss text-center"></div>
+</div>

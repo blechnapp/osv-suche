@@ -2,7 +2,7 @@
   "name": "OSVSuche",
   "namespace": "OSVSuche",
   "type": "general",
-  "version": "0.4.6",
+  "version": "0.5.0",
   "license": "proprietary",
   "author": "OSV",
   "shortDescription": "Eigene Shop-Suche: Sofort-Liste am Suchfeld mit Tippfehler-Toleranz, Synonymen und Verkaufsbonus.",

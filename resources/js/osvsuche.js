@@ -2259,9 +2259,10 @@
     } else { p.style.left = "0"; p.style.right = "0"; p.style.width = ""; }
   }
   function schliessen() { if (st.panel) st.panel.style.display = "none"; document.body.classList.remove("osvs-zeigt"); st.sel = -1; st.items = []; }
+  function ceresErlauben(ja) { document.body.classList.toggle("osvs-ceres", !!ja); }
   function zeigen(input, q) {
     st.input = input; st.q = q;
-    if (q.length < 2) { schliessen(); return; }
+    if (q.length < 2) { schliessen(); ceresErlauben(false); return; }
     var hinweis = "", items = [], k = meinten(q), fuerPlenty = q;
     if (k && k.terms.length) {
       items = suchen(k.terms.join(" "));
@@ -2281,9 +2282,9 @@
     if (!items.length) {
       // Wer gerade weitertippt ("herrenu" nach "herren"), behaelt die letzte Liste; sonst Ceres-Rueckfall
       if (st.letzteQ && (q.indexOf(st.letzteQ) === 0 || st.letzteQ.indexOf(q) === 0) && st.panel && st.panel.style.display === "block") return;
-      schliessen(); return;
+      schliessen(); st.alle = []; ceresErlauben(true); return; // wirklich nichts gefunden: Plenty darf helfen
     }
-    st.letzteQ = q;
+    st.letzteQ = q; ceresErlauben(false);
     var p = panelFuer(input);
     st.alle = items; st.fuerPlenty = fuerPlenty; st.hinweis = hinweis; st.offen = false;
     zeichnen(p, q, false);
@@ -2293,7 +2294,7 @@
   }
   // Liste zeichnen: erst MAX Treffer, nach "Alle anzeigen" alle (bis 60) zum Scrollen
   function zeichnen(p, q, alle) {
-    var items = st.alle, hinweis = st.hinweis, list = items.slice(0, alle ? 60 : MAX);
+    var items = st.alle, hinweis = st.hinweis, list = items.slice(0, alle ? 300 : MAX);
     st.items = list; st.sel = -1; st.offen = alle;
     p.innerHTML = (hinweis ? '<div class="osvs-hinweis">' + hinweis + "</div>" : "") +
       list.map(function (x, i) {
@@ -2304,9 +2305,7 @@
           (x.n > 1 ? " · +" + (x.n - 1) + " weitere Ausführungen" : "") + "</span></span>" +
           '<span class="osvs-p" data-id="' + d.id + '">' + esc(d.p) + "</span></a>";
       }).join("") +
-      (!alle && items.length > list.length
-        ? '<a class="osvs-alle osvs-mehr" href="#">Alle ' + items.length + " Artikel anzeigen ↓</a>"
-        : '<a class="osvs-alle" href="' + SUCH_URL + encodeURIComponent(st.fuerPlenty) + '">Zur Ergebnisseite →</a>');
+      '<a class="osvs-alle" href="' + SUCH_URL + encodeURIComponent(st.fuerPlenty) + '">Alle ' + items.length + " Artikel anzeigen →</a>";
     if (alle) p.scrollTop = 0;
     preiseNachladen(list);
   }
@@ -2367,7 +2366,10 @@
   // Ceres sucht beim Loslassen von Enter (keyup) – das unterdruecken, wenn wir schon einen Artikel oeffnen
   ["keyup", "keypress"].forEach(function (typ) {
     document.addEventListener(typ, function (ev) {
-      if (st.gehe && ev.key === "Enter" && istSuchfeld(ev.target)) { ev.preventDefault(); ev.stopImmediatePropagation(); }
+      if ((st.gehe || st.halteEnter) && ev.key === "Enter" && istSuchfeld(ev.target)) {
+        ev.preventDefault(); ev.stopImmediatePropagation();
+        if (typ === "keyup") st.halteEnter = false;
+      }
     }, true);
   });
   document.addEventListener("click", function (ev) {
@@ -2378,5 +2380,52 @@
     if (st.panel && st.panel.style.display === "block" && !st.panel.contains(ev.target) && !istSuchfeld(ev.target)) schliessen();
   }, true);
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.6" };
+  // ---------- Ergebnisseite (Widget "OSV Suchergebnisse") ----------
+  var SEITE = 24;
+  function kachel(d) {
+    var bild = String(d.b || "").replace("/preview/", "/middle/"), titel = esc(d.n + (d.v ? " " + d.v : ""));
+    return '<li class="col-12 col-md-4 col-lg-3"><article class="cmp cmp-product-thumb osvs-kachel"><div><div class="thumb-image"><div class="prop-1-1">' +
+      '<a href="' + esc(d.u) + '" aria-label="' + titel + '"><img src="' + esc(bild) + '" alt="' + titel + '" class="img-fluid" loading="lazy"></a></div></div>' +
+      '<div class="thumb-content"><a href="' + esc(d.u) + '" class="thumb-title small">' + titel + '</a>' +
+      '<div class="thumb-meta mt-2"><div class="prices"><div class="price osvs-p" data-id="' + d.id + '">' + esc(d.p) + ' *</div></div></div>' +
+      '<div class="vat small text-muted">* <span>inkl. ges. MwSt.</span> zzgl. <a data-toggle="modal" href="#shippingscosts" class="text-appearance">Versandkosten</a></div>' +
+      "</div></div></article></li>";
+  }
+  function seitePreise(el, list) {
+    var ids = list.map(function (x) { return x.d.id; }).join(",");
+    fetch(PREIS_URL + "?ids=" + ids, { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j || !j.preise) return;
+      Object.keys(j.preise).forEach(function (id) {
+        var e = el.querySelector('.osvs-p[data-id="' + id + '"]'), w = j.preise[id]; if (!e || !w) return;
+        e.innerHTML = (w.uvp && w.uvp !== w.p ? '<del class="osvs-uvp">' + esc(w.uvp) + "</del> " : "") + esc(w.p) + " *";
+      });
+    }).catch(function () {});
+  }
+  function ergebnisseite() {
+    var el = document.querySelector("[data-osvs-ergebnis]"); if (!el) return;
+    var q = (new URLSearchParams(window.location.search).get("query") || "").trim();
+    if (q.length < 2) return;
+    laden().then(function () {
+      var hinweis = "", items = [], k = meinten(q);
+      if (k && k.terms.length) {
+        items = suchen(k.terms.join(" "));
+        if (items.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
+      } else if (!k) items = suchen(q);
+      if (!items.length) { el.style.display = "none"; return; } // Plentys Raster bleibt stehen
+      var liste = el.querySelector(".osvs-ergebnis-liste"), kopf = el.querySelector(".osvs-ergebnis-kopf"), fuss = el.querySelector(".osvs-ergebnis-fuss"), n = 0;
+      kopf.innerHTML = '<p class="osvs-ergebnis-zahl">' + items.length + " Artikel für „" + esc(q) + "“</p>" + (hinweis ? '<p class="osvs-hinweis">' + hinweis + "</p>" : "");
+      function mehr() {
+        var teil = items.slice(n, n + SEITE); n += teil.length;
+        liste.insertAdjacentHTML("beforeend", teil.map(function (x) { return kachel(x.d); }).join(""));
+        seitePreise(liste, teil);
+        fuss.innerHTML = n < items.length ? '<button type="button" class="btn btn-primary osvs-weiter">Weitere Artikel anzeigen (' + (items.length - n) + ")</button>" : "";
+      }
+      mehr();
+      fuss.addEventListener("click", function (ev) { if (ev.target.closest(".osvs-weiter")) mehr(); });
+      document.body.classList.add("osvs-ergebnis-aktiv");
+    }).catch(function () { el.style.display = "none"; });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
+
+  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.5.0" };
 })();

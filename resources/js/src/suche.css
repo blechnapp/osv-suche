@@ -1,5 +1,5 @@
-/* Ceres-Vorschlaege nur ausblenden, wenn unsere Liste wirklich etwas zeigt */
-body.osvs-bereit.osvs-zeigt .autocomplete-suggestions{display:none!important}
+/* Ceres-Vorschlaege ausblenden, sobald unsere Suche bereit ist; nur bei 'nichts gefunden' (osvs-ceres) zeigen */
+body.osvs-bereit:not(.osvs-ceres) .autocomplete-suggestions{display:none!important}
 .osvs-panel{display:none;position:absolute;top:100%;left:0;right:0;z-index:1100;background:#fff;border:1px solid #e3e0d9;border-radius:0 0 6px 6px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:75vh;overflow-y:auto;text-align:left}
 .osvs-hinweis{padding:8px 12px;font-size:13px;background:#fffbeb;color:#7c4a03;border-bottom:1px solid #f0e6c8}
 .osvs-hit{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0ede6;color:#1d2433;text-decoration:none}
@@ -14,3 +14,9 @@ body.osvs-bereit.osvs-zeigt .autocomplete-suggestions{display:none!important}
 .osvs-mehr{background:#f7f5f0}
 .osvs-alle{display:block;padding:10px 12px;font-size:14px;color:#1f3a5f;font-weight:600}
 @media (max-width:767px){.osvs-panel{border-radius:6px;max-height:65vh}.osvs-hit img{width:44px;height:44px;flex-basis:44px}.osvs-n{font-size:14px;white-space:normal}.osvs-txt{word-break:normal;hyphens:auto}}
+
+/* Ergebnisseite: Plentys Raster, Toolbar, Filter und Seitenblaettern ausblenden, solange unser Widget Treffer zeigt */
+body.osvs-ergebnis-aktiv .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),body.osvs-ergebnis-aktiv .widget-pagination,body.osvs-ergebnis-aktiv .widget-toolbar,body.osvs-ergebnis-aktiv .widget-selected-filter,body.osvs-ergebnis-aktiv .widget-filter-base,body.osvs-ergebnis-aktiv .widget-items-per-page,body.osvs-ergebnis-aktiv .widget-item-sorting{display:none!important}
+.osvs-ergebnis-zahl{font-weight:600;margin:0 0 8px}
+.osvs-ergebnis .osvs-hinweis{display:inline-block;border-radius:4px;margin:0 0 12px}
+.osvs-ergebnis-fuss{margin:16px 0 24px}

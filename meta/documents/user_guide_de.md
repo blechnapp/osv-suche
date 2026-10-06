@@ -23,3 +23,9 @@ Pfeiltasten + Enter öffnen den markierten Artikel, Enter ohne Auswahl führt zu
 
 **Absicherung:** Die Ceres-Vorschläge werden nur ausgeblendet, solange unsere Liste Treffer zeigt. Lädt der Index nicht
 oder gibt es keine Treffer, sieht der Kunde die normale Plenty-Suche. Plugin aus = alter Zustand.
+
+## Ergebnisseite (ab 0.5.0)
+ShopBuilder-Widget **OSV Suchergebnisse** auf die Seite „Artikelsuchergebnisse“ ziehen, oberhalb von Plentys Artikel-Raster.
+Es zeigt dieselben Treffer und dieselbe Reihenfolge wie die Sofort-Liste, als Kachelraster im Ceres-Stil, 24 je Schritt
+mit „Weitere Artikel anzeigen“, Preise live. Solange es Treffer zeigt, werden Plentys Raster, Toolbar, Filter und
+Seitenblättern ausgeblendet. Findet es nichts oder lädt der Index nicht, bleibt Plentys Seite unverändert.
