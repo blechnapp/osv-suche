@@ -2,12 +2,14 @@
   "name": "OSVSuche",
   "namespace": "OSVSuche",
   "type": "general",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "license": "proprietary",
   "author": "OSV",
-  "shortDescription": "Eigene Shop-Suche (Stufe 1: Suchindex unter /rest/osv-suche/index, Neuaufbau über /rest/osv-suche/rebuild).",
+  "shortDescription": "Eigene Shop-Suche: Sofort-Liste am Suchfeld mit Tippfehler-Toleranz, Synonymen und Verkaufsbonus.",
   "description": "Stellt einen Suchindex aller im Shop sichtbaren Varianten bereit. Stufe 1: nur der Index, keine Anzeige im Shop.",
-  "categories": ["3527"],
+  "categories": [
+    "3527"
+  ],
   "require": {
     "IO": ">=5.0.0",
     "Ceres": ">=5.0.0"
@@ -15,5 +17,13 @@
   "serviceProvider": "OSVSuche\\Providers\\OSVSucheServiceProvider",
   "dependencies": {},
   "javaScriptFiles": [],
-  "runOnBuild": []
+  "runOnBuild": [],
+  "dataProviders": [
+    {
+      "key": "OSVSuche\\Containers\\SucheScript",
+      "name": "OSV Suche Sofort-Liste",
+      "description": "Bindet die Sofort-Suche am Ceres-Suchfeld ein.",
+      "defaultLayoutContainer": "Ceres::Script.AfterScriptsLoaded"
+    }
+  ]
 }

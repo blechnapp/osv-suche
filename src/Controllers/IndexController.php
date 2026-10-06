@@ -2,6 +2,7 @@
 
 namespace OSVSuche\Controllers;
 
+use Plenty\Modules\Category\Contracts\CategoryRepositoryContract;
 use Plenty\Modules\Plugin\Storage\Contracts\StorageRepositoryContract;
 use Plenty\Modules\Webshop\ItemSearch\SearchPresets\VariationList;
 use Plenty\Modules\Webshop\ItemSearch\Services\ItemSearchService;
@@ -23,6 +24,9 @@ class IndexController extends Controller
     const FILE_KEY   = 'suchindex.json';
     const SALES_KEY  = 'verkauf.json';
     const MAX_IDS    = 24;
+
+    /** @var array Kategoriepfade je ID, beim Neuaufbau gefuellt */
+    private $katCache = [];
     const PAGE_SIZE  = 100;
     const MAX_PAGES  = 80; // Sicherung: hoechstens 8.000 Varianten
 
@@ -70,6 +74,7 @@ class IndexController extends Controller
             $total = (int)($result['total'] ?? 0);
             foreach (($result['documents'] ?? []) as $document) {
                 $doc = $this->toDoc($document['data'] ?? []);
+                $doc['kat'] = $this->katPfad((int)$doc['k']);
                 $nr = (string)$doc['nr'];
                 $doc['vk'] = isset($sales[$nr]) ? round((float)$sales[$nr], 1) : 0;
                 $docs[] = $doc;
@@ -201,6 +206,33 @@ class IndexController extends Controller
             }
         }
         return $out;
+    }
+
+    /** Kategoriepfad "Weihnachten » Schwibbogen", Webshop-Daten liefern nur die ID */
+    private function katPfad(int $id): string
+    {
+        if ($id <= 0) {
+            return '';
+        }
+        if (array_key_exists($id, $this->katCache)) {
+            return $this->katCache[$id];
+        }
+        $this->katCache[$id] = '';
+        $name = '';
+        $parent = 0;
+        try {
+            /** @var CategoryRepositoryContract $repo */
+            $repo = pluginApp(CategoryRepositoryContract::class);
+            $cat = $repo->get($id, 'de');
+            $arr = $cat ? $cat->toArray() : [];
+            $name = (string)($arr['details'][0]['name'] ?? '');
+            $parent = (int)($arr['parentCategoryId'] ?? 0);
+        } catch (\Exception $e) {
+            $name = '';
+        }
+        $pfad = $parent > 0 && $parent !== $id ? $this->katPfad($parent) : '';
+        $this->katCache[$id] = $pfad !== '' ? $pfad . ' » ' . $name : $name;
+        return $this->katCache[$id];
     }
 
     private function zaehleVerkauf(array $docs): int
