@@ -11,5 +11,6 @@ body.osvs-bereit.osvs-zeigt .autocomplete-suggestions{display:none!important}
 .osvs-p{flex:0 0 auto;font-weight:600;font-size:14px;white-space:nowrap}
 .osvs-uvp{color:#9ca3af;font-weight:400;margin-right:4px}
 .osvs-panel mark{background:#fde68a;padding:0;color:inherit}
+.osvs-mehr{background:#f7f5f0}
 .osvs-alle{display:block;padding:10px 12px;font-size:14px;color:#1f3a5f;font-weight:600}
 @media (max-width:767px){.osvs-panel{border-radius:6px;max-height:65vh}.osvs-hit img{width:44px;height:44px;flex-basis:44px}.osvs-n{font-size:14px;white-space:normal}.osvs-txt{word-break:normal;hyphens:auto}}

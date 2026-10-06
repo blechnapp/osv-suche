@@ -20,7 +20,7 @@
     return t.replace(/(oegen|ogen)$/, "ogen").replace(/(chen|innen|ern|en|er|e|n|s)$/, "");
   }
   var STOP = {}; "mit und fuer der die das den dem des ein eine einer einem eines aus von vom zum zur im in am an auf ohne als oder ganz sehr cm mm m hoch gross grosse grosser kleine klein kleiner neu neue neuer nr stueck stk inh ek e.k gmbh kg eg co erzgeb original".split(" ").forEach(function (w) { STOP[w] = 1; });
-  var SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
+  var ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
 
   function processTerm(t) {
     var x = norm(t).replace(/[.,;:!?()]/g, "");
@@ -127,11 +127,12 @@
     var maxvk = 0;
     docs.forEach(function (d) { st.byId[String(d.id)] = d; if ((d.vk || 0) > maxvk) maxvk = d.vk; });
     LOGMAX = Math.log(1 + maxvk) || 1;
-    VOCAB = {}; TEILE = {}; VFREQ = {}; VSHOW = {};
+    VOCAB = {}; TEILE = {}; VFREQ = {}; VSHOW = {}; ROH = {};
     docs.forEach(function (d) {
       teile(d).split(" ").forEach(function (x) { if (x) TEILE[x] = 1; });
       ["n", "v", "a", "h", "kat"].forEach(function (f) {
         tokenize(d[f] || "").forEach(function (t) {
+          ROH[norm(t)] = 1;
           var r = processTerm(t); if (!r) return;
           r.forEach(function (w) {
             VOCAB[w] = 1; VFREQ[w] = (VFREQ[w] || 0) + 1;
@@ -180,8 +181,8 @@
     var opts = function (mode) {
       return {
         boostTerm: function (term) { return HERKUNFT[term] ? 0.15 : 1; },
-        boost: { n: 3, v: 1.2, a: 1, kat: 4, h: 1, nr: 4, t: 0.4 },
-        prefix: function (t) { return t.length >= 3 && !/^\d+$/.test(t); },
+        boost: { n: 3, v: 1.2, a: 1, kat: 4, h: 1, nr: 4, t: 1.0 },
+        prefix: function (t) { return t.length >= 2 && !/^\d+$/.test(t); },
         fuzzy: fuzzy, combineWith: mode,
         boostDocument: function (id, term, sf) {
           if (!sf) return 1;
@@ -246,19 +247,39 @@
   function zeigen(input, q) {
     st.input = input; st.q = q;
     if (q.length < 2) { schliessen(); return; }
-    var hinweis = "", items = [], k = meinten(q);
+    var hinweis = "", items = [], k = meinten(q), fuerPlenty = q;
     if (k && k.terms.length) {
       items = suchen(k.terms.join(" "));
-      if (items.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>" + (k.weg.length ? " (ohne „" + esc(k.weg.join(" ")) + "“)" : "");
-    } else if (!k) items = suchen(q);
+      if (items.length) {
+        fuerPlenty = k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ");
+        hinweis = "Ergebnisse für <b>" + esc(fuerPlenty) + "</b>" + (k.weg.length ? " (ohne „" + esc(k.weg.join(" ")) + "“)" : "");
+      }
+    } else if (!k) {
+      items = suchen(q);
+      fuerPlenty = tokenize(q).map(function (t) {
+        var n = norm(t);
+        if (ROH[n] || !(SYN[n] || SYN[stem(n)])) return t;
+        var z = SYN[n] || SYN[stem(n)];
+        return VSHOW[stem(z)] || z;
+      }).join(" ");
+    }
     if (!items.length) {
       // Wer gerade weitertippt ("herrenu" nach "herren"), behaelt die letzte Liste; sonst Ceres-Rueckfall
       if (st.letzteQ && (q.indexOf(st.letzteQ) === 0 || st.letzteQ.indexOf(q) === 0) && st.panel && st.panel.style.display === "block") return;
       schliessen(); return;
     }
     st.letzteQ = q;
-    var p = panelFuer(input), list = items.slice(0, MAX);
-    st.items = list; st.sel = -1;
+    var p = panelFuer(input);
+    st.alle = items; st.fuerPlenty = fuerPlenty; st.hinweis = hinweis; st.offen = false;
+    zeichnen(p, q, false);
+    p.style.display = "block";
+    breite(p);
+    document.body.classList.add("osvs-zeigt");
+  }
+  // Liste zeichnen: erst MAX Treffer, nach "Alle anzeigen" alle (bis 60) zum Scrollen
+  function zeichnen(p, q, alle) {
+    var items = st.alle, hinweis = st.hinweis, list = items.slice(0, alle ? 60 : MAX);
+    st.items = list; st.sel = -1; st.offen = alle;
     p.innerHTML = (hinweis ? '<div class="osvs-hinweis">' + hinweis + "</div>" : "") +
       list.map(function (x, i) {
         var d = x.d;
@@ -268,10 +289,10 @@
           (x.n > 1 ? " · +" + (x.n - 1) + " weitere Ausführungen" : "") + "</span></span>" +
           '<span class="osvs-p" data-id="' + d.id + '">' + esc(d.p) + "</span></a>";
       }).join("") +
-      '<a class="osvs-alle" href="' + SUCH_URL + encodeURIComponent(q) + '">Alle Ergebnisse anzeigen (' + items.length + ") →</a>";
-    p.style.display = "block";
-    breite(p);
-    document.body.classList.add("osvs-zeigt");
+      (!alle && items.length > list.length
+        ? '<a class="osvs-alle osvs-mehr" href="#">Alle ' + items.length + " Artikel anzeigen ↓</a>"
+        : '<a class="osvs-alle" href="' + SUCH_URL + encodeURIComponent(st.fuerPlenty) + '">Zur Ergebnisseite →</a>');
+    if (alle) p.scrollTop = 0;
     preiseNachladen(list);
   }
   var preisTimer = null;
@@ -321,6 +342,12 @@
       st.gehe = st.items[st.sel].d.u;
       window.location.href = st.gehe;
     }
+    else if (ev.key === "Enter" && st.fuerPlenty && st.fuerPlenty !== t.value.trim()) {
+      // Tippfehler korrigiert: die Ergebnisseite mit dem richtigen Wort aufrufen
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      st.gehe = SUCH_URL + encodeURIComponent(st.fuerPlenty);
+      window.location.href = st.gehe;
+    }
   }, true);
   // Ceres sucht beim Loslassen von Enter (keyup) – das unterdruecken, wenn wir schon einen Artikel oeffnen
   ["keyup", "keypress"].forEach(function (typ) {
@@ -329,8 +356,12 @@
     }, true);
   });
   document.addEventListener("click", function (ev) {
+    var mehr = ev.target && ev.target.closest && ev.target.closest(".osvs-mehr");
+    if (mehr && st.panel && st.panel.contains(mehr)) { ev.preventDefault(); ev.stopImmediatePropagation(); zeichnen(st.panel, st.q, true); if (st.input) st.input.focus(); return; }
+  }, true);
+  document.addEventListener("click", function (ev) {
     if (st.panel && st.panel.style.display === "block" && !st.panel.contains(ev.target) && !istSuchfeld(ev.target)) schliessen();
   }, true);
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.5" };
+  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.6" };
 })();
