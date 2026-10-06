@@ -2223,6 +2223,14 @@
     if (st.panel.parentElement !== host) host.appendChild(st.panel);
     return st.panel;
   }
+  // Am Handy ist der Suchkasten schmaler als der Bildschirm: Liste auf volle Breite (12 px Rand) ziehen
+  function breite(p) {
+    var host = p.parentElement; if (!host) return;
+    if (window.innerWidth < 768) {
+      var r = host.getBoundingClientRect();
+      p.style.left = (12 - r.left) + "px"; p.style.right = "auto"; p.style.width = (window.innerWidth - 24) + "px";
+    } else { p.style.left = "0"; p.style.right = "0"; p.style.width = ""; }
+  }
   function schliessen() { if (st.panel) st.panel.style.display = "none"; document.body.classList.remove("osvs-zeigt"); st.sel = -1; st.items = []; }
   function zeigen(input, q) {
     st.input = input; st.q = q;
@@ -2232,7 +2240,12 @@
       items = suchen(k.terms.join(" "));
       if (items.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>" + (k.weg.length ? " (ohne „" + esc(k.weg.join(" ")) + "“)" : "");
     } else if (!k) items = suchen(q);
-    if (!items.length) { schliessen(); return; } // Ceres zeigt dann seine eigenen Vorschlaege
+    if (!items.length) {
+      // Wer gerade weitertippt ("herrenu" nach "herren"), behaelt die letzte Liste; sonst Ceres-Rueckfall
+      if (st.letzteQ && q.indexOf(st.letzteQ) === 0 && q.length - st.letzteQ.length <= 3 && st.panel && st.panel.style.display === "block") return;
+      schliessen(); return;
+    }
+    st.letzteQ = q;
     var p = panelFuer(input), list = items.slice(0, MAX);
     st.items = list; st.sel = -1;
     p.innerHTML = (hinweis ? '<div class="osvs-hinweis">' + hinweis + "</div>" : "") +
@@ -2246,6 +2259,7 @@
       }).join("") +
       '<a class="osvs-alle" href="' + SUCH_URL + encodeURIComponent(q) + '">Alle Ergebnisse anzeigen (' + items.length + ") →</a>";
     p.style.display = "block";
+    breite(p);
     document.body.classList.add("osvs-zeigt");
     preiseNachladen(list);
   }
@@ -2307,5 +2321,5 @@
     if (st.panel && st.panel.style.display === "block" && !st.panel.contains(ev.target) && !istSuchfeld(ev.target)) schliessen();
   }, true);
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.1" };
+  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.2" };
 })();
