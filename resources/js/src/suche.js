@@ -170,7 +170,7 @@
           if (!sf) return 1;
           var f = EIGEN[sf.h] ? 1 + eb : 1;
           f *= 1 + vb * Math.log(1 + (sf.vk || 0)) / LOGMAX;
-          var d = st.byId[String(id)], k = d && d.kat ? d.kat : "";
+          var d = st.byId[String(id)], k = d ? ((d.kat || "") + " " + (d.n || "")).toLowerCase() : "";
           if (k && ABW.some(function (a) { return k.indexOf(a) >= 0; })) f *= af;
           return f;
         }
@@ -292,5 +292,5 @@
     if (st.panel && st.panel.style.display === "block" && !st.panel.contains(ev.target) && !istSuchfeld(ev.target)) schliessen();
   }, true);
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.0" };
+  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.1" };
 })();

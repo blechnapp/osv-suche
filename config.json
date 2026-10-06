@@ -42,7 +42,7 @@
         "abwerten": {
           "type": "text",
           "required": false,
-          "label": "Abwerten: Kategorie enthält (getrennt mit ;)",
+          "label": "Abwerten: Kategorie oder Artikelname enthält (getrennt mit ;)",
           "options": { "defaultValue": "Servietten;Ersatzteile;Zubehör;Sale" }
         },
         "abwertFaktor": {
