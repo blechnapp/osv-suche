@@ -72,7 +72,15 @@
   }
   function istAnfang(w) { if (w.length < 3) return true; for (var v in VOCAB) if (v.indexOf(w) === 0) return true; return false; }
   function bekannt(w) { return VOCAB[w] || TEILE[w] || /\d/.test(w) || istAnfang(w); }
+  // Getipptes ist der Anfang eines Synonyms ("schwipp" -> "schwippbogen" -> schwibbogen): Synonym gewinnt
+  function synAnfang(w) {
+    if (w.length < 4) return null;
+    var best = null;
+    for (var k in SYN) { if (k.length > w.length && k.indexOf(w) === 0 && (!best || k.length < best.length)) best = k; }
+    return best ? stem(SYN[best]) : null;
+  }
   function korrektur(w) {
+    var sa = (!VOCAB[w] && !istAnfang(w)) ? synAnfang(w) : null; if (sa) return sa;
     if (bekannt(w) || w.length < 5) return null;
     var max = w.length >= 12 ? 3 : (w.length >= 9 ? 2 : 1), best = null, bd = 99, bl = 99, bf = 0;
     for (var v in VOCAB) {
@@ -93,6 +101,8 @@
     tokenize(q).forEach(function (tok) {
       var r = queryTerm(tok); if (!r) return;
       r.forEach(function (w) {
+        var sa = (!VOCAB[w] && !istAnfang(w)) ? synAnfang(w) : null;
+        if (sa) { terms.push(sa); geaendert = true; return; }
         if (bekannt(w)) { terms.push(w); return; }
         var c = korrektur(w);
         if (c) { terms.push(c); geaendert = true; } else { weg.push(tok); geaendert = true; }
@@ -320,5 +330,5 @@
     if (st.panel && st.panel.style.display === "block" && !st.panel.contains(ev.target) && !istSuchfeld(ev.target)) schliessen();
   }, true);
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.3" };
+  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.4" };
 })();
