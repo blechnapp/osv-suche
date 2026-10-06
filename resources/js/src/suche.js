@@ -33,7 +33,9 @@
     ["n", "v", "a"].forEach(function (f) {
       tokenize(d[f] || "").forEach(function (tok) {
         var r = processTerm(tok); if (!r) return;
-        r.forEach(function (w) { if (w.length >= 11) for (var i = 4; i <= w.length - 6; i++) out.push(w.slice(i)); });
+        // Wortteile aus dem Stamm und aus dem unveraenderten Wort ("raeucherofen" -> "ofen")
+        var roh = norm(tok).replace(/[.,;:!?()]/g, "");
+        r.concat(roh.length >= 7 ? [roh] : []).forEach(function (w) { if (w.length >= 7) for (var i = 3; i <= w.length - 4; i++) out.push(w.slice(i)); });
       });
     });
     return out.join(" ");
@@ -169,7 +171,7 @@
   // ---------- Suche ----------
   function fuzzy(t) {
     var lvl = st.cfg.toleranz == null ? 2 : st.cfg.toleranz;
-    if (/\d/.test(t) || lvl === 0) return 0;
+    if (/\d/.test(t) || lvl === 0 || VOCAB[t]) return 0; // exakt vorhandenes Wort nicht unscharf suchen
     if (t.length >= 9 && lvl === 2) return 2;
     return t.length >= 5 ? 1 : 0;
   }
@@ -330,5 +332,5 @@
     if (st.panel && st.panel.style.display === "block" && !st.panel.contains(ev.target) && !istSuchfeld(ev.target)) schliessen();
   }, true);
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.4" };
+  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.4.5" };
 })();
