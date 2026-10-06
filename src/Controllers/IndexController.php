@@ -70,7 +70,8 @@ class IndexController extends Controller
             $total = (int)($result['total'] ?? 0);
             foreach (($result['documents'] ?? []) as $document) {
                 $doc = $this->toDoc($document['data'] ?? []);
-                $doc['vk'] = isset($sales[$doc['nr']]) ? round((float)$sales[$doc['nr']], 1) : 0;
+                $nr = (string)$doc['nr'];
+                $doc['vk'] = isset($sales[$nr]) ? round((float)$sales[$nr], 1) : 0;
                 $docs[] = $doc;
             }
             $pageTimes[] = (int)round((microtime(true) - $t0) * 1000);
@@ -150,7 +151,9 @@ class IndexController extends Controller
         }
         $clean = [];
         foreach ($data as $nr => $wert) {
-            if (is_string($nr) && strlen($nr) <= 40 && is_numeric($wert)) {
+            // PHP macht aus rein numerischen Schluesseln ("12261") Zahlen, deshalb zurueck in Text
+            $nr = (string)$nr;
+            if ($nr !== '' && strlen($nr) <= 40 && is_numeric($wert)) {
                 $clean[$nr] = (float)$wert;
             }
         }
