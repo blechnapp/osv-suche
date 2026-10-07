@@ -606,6 +606,14 @@
     schicht.innerHTML = '<div class="container-max"><div class="osvs-sofort-kopf"><h1 class="h2">Suchergebnisse für: ' + esc(q) + '</h1><button type="button" class="osvs-sofort-zu" aria-label="Schließen">×</button></div></div>';
     var el2 = frischesWidget(null);
     schicht.firstChild.appendChild(el2);
+    // Erklaerung zum Preis-Sternchen: den Hinweis aus dem ShopBuilder-Baustein der Seite uebernehmen,
+    // denn der liegt unter der Ebene verdeckt (in den Karten blendet Ceres die Zeile per item-vat-hidden aus)
+    var hinweis = [].filter.call(document.querySelectorAll(".widget-code .vat"), function (x) { return !x.closest(".osvs-sofort"); })[0];
+    var fussnote = document.createElement("div");
+    fussnote.className = "osvs-sofort-fussnote";
+    if (hinweis) fussnote.appendChild(hinweis.cloneNode(true));
+    else fussnote.innerHTML = '<div class="vat small text-muted">* <span>inkl. ges. MwSt.</span> zzgl. <a data-toggle="modal" href="#shippingscosts" class="text-appearance">Versandkosten</a></div>';
+    schicht.firstChild.appendChild(fussnote);
     document.body.appendChild(schicht);
     document.documentElement.classList.add("osvs-sofort-offen");
     if (!history.state || !history.state.osvs) history.pushState({ osvs: q, ebene: true }, "", url);
