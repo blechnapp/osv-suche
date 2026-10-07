@@ -2192,7 +2192,7 @@
     if (t.length >= 9 && lvl === 2) return 2;
     return t.length >= 5 ? 1 : 0;
   }
-  function suchen(q) {
+  function suchen(q, jeVariante) {
     var cfg = st.cfg, eb = (cfg.eigenmarkenBonus || 0) / 100, vb = (cfg.verkaufsBonus || 0) / 100, af = (cfg.abwertFaktor || 100) / 100;
     var opts = function (mode) {
       return {
@@ -2235,6 +2235,14 @@
       r.sort(function (a, b) { return b.score - a.score; });
     }
     var seen = {}, out = [];
+    if (jeVariante) {
+      // Ergebnisseite: jede Variante eine Kachel, wie auf den Kategorieseiten
+      // Varianten eines Artikels zusammen hintereinander, Artikel nach ihrer besten Variante (wie Kategorieseiten)
+      var gruppen = {}, folge = [];
+      r.forEach(function (x) { var d = st.byId[String(x.id)]; if (!d) return; if (!gruppen[d.i]) { gruppen[d.i] = []; folge.push(d.i); } gruppen[d.i].push({ d: d, n: 1 }); });
+      folge.forEach(function (i) { out.push.apply(out, gruppen[i]); });
+      return out;
+    }
     r.forEach(function (x) { var d = st.byId[String(x.id)]; if (!d) return; if (!seen[d.i]) { seen[d.i] = { d: d, n: 1 }; out.push(seen[d.i]); } else seen[d.i].n++; });
     return out;
   }
@@ -2413,9 +2421,9 @@
     laden().then(function () {
       var hinweis = "", alle = [], k = meinten(q);
       if (k && k.terms.length) {
-        alle = suchen(k.terms.join(" "));
+        alle = suchen(k.terms.join(" "), true);
         if (alle.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
-      } else if (!k) alle = suchen(q);
+      } else if (!k) alle = suchen(q, true);
       if (!alle.length) { el.style.display = "none"; document.body.classList.add("osvs-aus"); return; } // Plentys Seite bleibt stehen
       alle.forEach(function (x, i) { x.rang = i; x.preis = preisZahl(x.d.p); });
       // Passende Kategorien: Standardkategorie je Treffer, nach Anzahl, ohne Sammelkategorien
@@ -2540,5 +2548,5 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.7.0" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.7.1" };
 })();
