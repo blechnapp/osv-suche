@@ -343,7 +343,13 @@
     }, 60);
   }, true);
   document.addEventListener("keydown", function (ev) {
-    var t = ev.target; if (!istSuchfeld(t) || !st.panel || st.panel.style.display !== "block") return;
+    var t = ev.target; if (!istSuchfeld(t)) return;
+    var offen = st.panel && st.panel.style.display === "block";
+    if (ev.key === "Enter" && !(offen && st.sel >= 0) && st.ms && t.value.trim().length >= 2) {
+      ev.preventDefault(); ev.stopImmediatePropagation(); st.halteEnter = true;
+      sofort(t.value, t); return;
+    }
+    if (!offen) return;
     if (ev.key === "ArrowDown") { ev.preventDefault(); markieren(st.sel + 1); }
     else if (ev.key === "ArrowUp") { ev.preventDefault(); markieren(st.sel - 1); }
     else if (ev.key === "Escape") { schliessen(); }
@@ -352,12 +358,7 @@
       st.gehe = st.items[st.sel].d.u;
       window.location.href = st.gehe;
     }
-    else if (ev.key === "Enter" && st.fuerPlenty && st.fuerPlenty !== t.value.trim()) {
-      // Tippfehler korrigiert: die Ergebnisseite mit dem richtigen Wort aufrufen
-      ev.preventDefault(); ev.stopImmediatePropagation();
-      st.gehe = SUCH_URL + encodeURIComponent(st.fuerPlenty);
-      window.location.href = st.gehe;
-    }
+
   }, true);
   // Ceres sucht beim Loslassen von Enter (keyup) – das unterdruecken, wenn wir schon einen Artikel oeffnen
   ["keyup", "keypress"].forEach(function (typ) {
@@ -369,6 +370,13 @@
     }, true);
   });
   document.addEventListener("click", function (ev) {
+    var alleL = ev.target && ev.target.closest && ev.target.closest(".osvs-panel .osvs-alle");
+    if (alleL && st.ms && st.input) { ev.preventDefault(); ev.stopImmediatePropagation(); sofort(st.input.value, st.input); return; }
+    var lupe = ev.target && ev.target.closest && ev.target.closest(".search-submit");
+    if (lupe && st.ms) {
+      var feld = lupe.closest("form, .position-relative, div") && lupe.parentNode.querySelector("input.search-input");
+      if (feld && feld.value.trim().length >= 2) { ev.preventDefault(); ev.stopImmediatePropagation(); sofort(feld.value, feld); return; }
+    }
     var mehr = ev.target && ev.target.closest && ev.target.closest(".osvs-mehr");
     if (mehr && st.panel && st.panel.contains(mehr)) { ev.preventDefault(); ev.stopImmediatePropagation(); zeichnen(st.panel, st.q, true); if (st.input) st.input.focus(); return; }
   }, true);
@@ -401,17 +409,15 @@
   function preisZahl(t) { var m = String(t || "").replace(/\./g, "").replace(",", ".").match(/[\d.]+/); return m ? parseFloat(m[0]) : 0; }
   // Wie in der PWA (filters.config.ts): Sammelkategorien zaehlen nicht als "passende Kategorie"
   var KAT_AUSNAHMEN = { 290: 1, 261: 1 }, KAT_MAX = 6;
-  function ergebnisseite() {
-    var el = document.querySelector("[data-osvs-ergebnis]"); if (!el) return;
-    var q = (new URLSearchParams(window.location.search).get("query") || "").trim();
-    if (q.length < 2) return;
+  function ergebnisRendern(el, q, leer) {
+    leer = leer || function () { el.style.display = "none"; document.body.classList.add("osvs-aus"); };
     laden().then(function () {
       var hinweis = "", alle = [], k = meinten(q);
       if (k && k.terms.length) {
         alle = suchen(k.terms.join(" "), true);
         if (alle.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
       } else if (!k) alle = suchen(q, true);
-      if (!alle.length) { el.style.display = "none"; document.body.classList.add("osvs-aus"); return; } // Plentys Seite bleibt stehen
+      if (!alle.length) { leer(); return; } // Plentys Seite bleibt stehen
       alle.forEach(function (x, i) { x.rang = i; x.preis = preisZahl(x.d.p); });
       // Passende Kategorien: Standardkategorie je Treffer, nach Anzahl, ohne Sammelkategorien
       var katZahl = {}, katName = {};
@@ -543,9 +549,83 @@
       document.body.classList.add("osvs-ergebnis-aktiv");
       schliessen();
       zeichneKopf(); anwenden();
-    }).catch(function () { el.style.display = "none"; document.body.classList.add("osvs-aus"); });
+    }).catch(function () { leer(); });
+  }
+  function ergebnisseite() {
+    var el = document.querySelector("[data-osvs-ergebnis]"); if (!el) return;
+    var q = (new URLSearchParams(window.location.search).get("query") || "").trim();
+    if (q.length < 2) return;
+    ergebnisRendern(el, q);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.8.1" };
+  // ---------- Sofort-Ergebnisse bei Enter: kein Neuladen der Seite ----------
+  var GERUEST = '<div class="osvs-ergebnis-kopf"></div><div class="widget widget-item-grid widget-primary item-vat-hidden"><ul class="widget-inner row product-list grid osvs-ergebnis-liste"></ul></div><div class="osvs-ergebnis-fuss text-center"></div>';
+  function frischesWidget(alt) {
+    var neu = document.createElement("div");
+    neu.className = alt ? alt.className : "widget osvs-ergebnis";
+    neu.setAttribute("data-osvs-ergebnis", "");
+    neu.innerHTML = GERUEST;
+    if (alt) alt.parentNode.replaceChild(neu, alt);
+    return neu;
+  }
+  function ueberschrift(q) {
+    var h = [].filter.call(document.querySelectorAll("h1"), function (x) { return /Suchergebnisse/.test(x.textContent); })[0];
+    if (h) h.textContent = "Suchergebnisse für: " + q;
+  }
+  var schicht = null;
+  function schichtZu() {
+    if (!schicht) return;
+    schicht.remove(); schicht = null;
+    document.documentElement.classList.remove("osvs-sofort-offen");
+  }
+  function sofort(q, eingabe) {
+    q = (q || "").trim(); if (q.length < 2) return false;
+    var plenty = function () { var k = meinten(q); var w = k && k.terms.length ? k.terms.map(function (x) { return VSHOW[x] || x; }).join(" ") : q; window.location.href = SUCH_URL + encodeURIComponent(w); };
+    var url = SUCH_URL + encodeURIComponent(q);
+    if (eingabe) eingabe.blur();
+    schliessen();
+    var hier = document.querySelector("[data-osvs-ergebnis]");
+    if (hier && !schicht) {
+      // schon auf der Ergebnisseite: Treffer an Ort und Stelle austauschen
+      document.body.classList.remove("osvs-aus");
+      var el = frischesWidget(hier); el.style.display = "";
+      ueberschrift(q);
+      history.pushState({ osvs: q }, "", url);
+      ergebnisRendern(el, q, plenty);
+      window.scrollTo(0, 0);
+      return true;
+    }
+    // auf jeder anderen Seite: Ergebnisse als Ebene ueber dem Inhalt, unter dem Kopf
+    schichtZu();
+    var kopfHoehe = 0, h = document.getElementById("page-header");
+    if (h) kopfHoehe = Math.max(0, h.getBoundingClientRect().bottom);
+    schicht = document.createElement("div");
+    schicht.className = "osvs-sofort";
+    schicht.style.top = kopfHoehe + "px";
+    schicht.innerHTML = '<div class="container-max"><div class="osvs-sofort-kopf"><h1 class="h2">Suchergebnisse für: ' + esc(q) + '</h1><button type="button" class="osvs-sofort-zu" aria-label="Schließen">×</button></div></div>';
+    var el2 = frischesWidget(null);
+    schicht.firstChild.appendChild(el2);
+    document.body.appendChild(schicht);
+    document.documentElement.classList.add("osvs-sofort-offen");
+    if (!history.state || !history.state.osvs) history.pushState({ osvs: q, ebene: true }, "", url);
+    else history.replaceState({ osvs: q, ebene: true }, "", url);
+    ergebnisRendern(el2, q, function () { schichtZu(); plenty(); });
+    return true;
+  }
+  document.addEventListener("click", function (ev) {
+    if (ev.target.closest && ev.target.closest(".osvs-sofort-zu")) { ev.preventDefault(); history.back(); }
+  });
+  window.addEventListener("popstate", function (ev) {
+    if (ev.state && ev.state.osvs) {
+      var hier = document.querySelector(".osvs-sofort [data-osvs-ergebnis]") || document.querySelector("[data-osvs-ergebnis]");
+      if (hier) { var el = frischesWidget(hier); ueberschrift(ev.state.osvs); ergebnisRendern(el, ev.state.osvs); }
+      return;
+    }
+    if (schicht) { schichtZu(); return; }
+    // zurueck auf eine Ergebnis-Adresse ohne eigenen Zustand: Seite neu laden
+    if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
+  });
+
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.0" };
 })();

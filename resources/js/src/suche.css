@@ -53,3 +53,11 @@ body.osvs-ergebnis-aktiv .widget-item-grid:not(.osvs-ergebnis .widget-item-grid)
 .osvs-f-tipp{font-size:13px;color:#7a8594;margin:-4px 0 14px}
 .osvs-ansehen{display:block;width:100%;margin:8px 0}
 @media (max-width:767px){.osvs-kats{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.osvs-leiste{gap:8px}.osvs-dd-knopf{padding:6px 10px;font-size:13px}.osvs-schalter{font-size:13px}.osvs-sortierung{margin-left:0;width:100%}.osvs-sortierung label{display:inline}.osvs-sort{flex:1}.osvs-dd{position:static}.osvs-leiste{position:relative}.osvs-dd-panel{left:0;right:0;max-width:none;min-width:0}}
+
+/* Sofort-Ergebnisse als Ebene */
+.osvs-sofort{position:fixed;left:0;right:0;bottom:0;z-index:1040;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 0 40px}
+.osvs-sofort .container-max{padding:0 15px}
+.osvs-sofort-kopf{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px}
+.osvs-sofort-kopf h1{margin:0}
+.osvs-sofort-zu{border:0;background:#f2f4f7;border-radius:50%;width:40px;height:40px;font-size:24px;line-height:40px;cursor:pointer;flex:0 0 40px}
+html.osvs-sofort-offen body{overflow:hidden}

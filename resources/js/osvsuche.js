@@ -2020,7 +2020,7 @@
 (function () {
   "use strict";
   if (window.OSVSuche) return;
-  (function () { var st = document.createElement("style"); st.id = "osvs-css"; st.textContent = "/* Ceres-Vorschlaege ausblenden, sobald unsere Suche bereit ist; nur bei 'nichts gefunden' (osvs-ceres) zeigen */body.osvs-bereit:not(.osvs-ceres) .autocomplete-suggestions{display:none!important}.osvs-panel{display:none;position:absolute;top:100%;left:0;right:0;z-index:1100;background:#fff;border:1px solid #e3e0d9;border-radius:0 0 6px 6px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:75vh;overflow-y:auto;text-align:left}.osvs-hinweis{padding:8px 12px;font-size:13px;background:#fffbeb;color:#7c4a03;border-bottom:1px solid #f0e6c8}.osvs-hit{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0ede6;color:#1d2433;text-decoration:none}.osvs-hit:hover,.osvs-hit.osvs-sel{background:#f7f5f0;text-decoration:none;color:#1d2433}.osvs-hit img{width:48px;height:48px;object-fit:contain;flex:0 0 48px;background:#fff}.osvs-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.3}.osvs-n{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis}.osvs-v{font-size:12px;color:#6b7280}.osvs-p{flex:0 0 auto;font-weight:600;font-size:14px;white-space:nowrap}.osvs-uvp{color:#9ca3af;font-weight:400;margin-right:4px}.osvs-panel mark{background:#fde68a;padding:0;color:inherit}.osvs-mehr{background:#f7f5f0}.osvs-alle{display:block;padding:10px 12px;font-size:14px;color:#1f3a5f;font-weight:600}@media (max-width:767px){.osvs-panel{border-radius:6px;max-height:65vh}.osvs-hit img{width:44px;height:44px;flex-basis:44px}.osvs-n{font-size:14px;white-space:normal}.osvs-txt{word-break:normal;hyphens:auto}}/* Ergebnisseite: Plentys Raster, Toolbar, Filter und Seitenblaettern ausblenden, solange unser Widget Treffer zeigt */body.osvs-ergebnis-aktiv .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),body.osvs-ergebnis-aktiv .widget-pagination,body.osvs-ergebnis-aktiv .widget-toolbar,body.osvs-ergebnis-aktiv .widget-selected-filter,body.osvs-ergebnis-aktiv .widget-filter-base,body.osvs-ergebnis-aktiv .widget-items-per-page,body.osvs-ergebnis-aktiv .widget-item-sorting{display:none!important}.osvs-ergebnis-zahl{font-weight:600;margin:0 0 8px}.osvs-ergebnis .osvs-hinweis{display:inline-block;border-radius:4px;margin:0 0 12px}.osvs-ergebnis-fuss{margin:16px 0 24px}.osvs-kopf-zeile .osvs-ergebnis-zahl{font-size:15px;color:#555;margin:0 0 10px}.osvs-kats{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;margin:0 0 4px;scrollbar-width:thin}.osvs-kat{flex:0 0 auto;border:1px solid #c9ced6;background:#fff;color:#04305e;border-radius:20px;padding:7px 16px;font-size:14px;cursor:pointer;white-space:nowrap;transition:background .15s}.osvs-kat:hover{border-color:#04305e}.osvs-kat small{margin-left:6px;color:#7a8594;font-size:12px}.osvs-kat-an{background:#04305e;color:#fff;border-color:#04305e}.osvs-kat-an small{color:#c8d3e6}.osvs-leiste{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #e3e6ea;border-bottom:1px solid #e3e6ea;margin-bottom:12px}.osvs-dd{position:relative}.osvs-dd-knopf{border:1px solid #c9ced6;background:#fff;color:#212529;border-radius:4px;padding:7px 12px;font-size:14px;cursor:pointer;white-space:nowrap}.osvs-dd-knopf:hover,.osvs-dd-auf .osvs-dd-knopf{border-color:#04305e}.osvs-dd-aktiv{border-color:#04305e;color:#04305e;font-weight:600}.osvs-dd-zahl{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#04305e;color:#fff;font-size:11px;text-align:center;margin-left:4px}.osvs-dd-pfeil{font-size:11px;margin-left:4px;color:#7a8594}.osvs-dd-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:50;background:#fff;border:1px solid #d5dae1;border-radius:6px;box-shadow:0 10px 28px rgba(0,0,0,.14);padding:8px;min-width:240px;max-width:340px;max-height:320px;overflow-y:auto}.osvs-dd-auf .osvs-dd-panel{display:block}.osvs-opt{display:flex;align-items:center;gap:8px;margin:0;padding:6px 8px;border-radius:4px;font-size:14px;cursor:pointer}.osvs-opt:hover{background:#f3f5f8}.osvs-opt span{flex:1}.osvs-opt small{color:#7a8594}.osvs-preis{display:flex;align-items:center;gap:8px;padding:4px}.osvs-preis input{width:100px}.osvs-schalter{display:inline-flex;align-items:center;gap:8px;margin:0;font-size:14px;cursor:pointer}.osvs-sortierung{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:14px}.osvs-sortierung label{margin:0;color:#555}.osvs-sort{border:1px solid #c9ced6;border-radius:4px;padding:6px 8px;font-size:14px;background:#fff}.osvs-marken{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}.osvs-marke{border:0;background:#e8eef6;color:#04305e;border-radius:16px;padding:5px 12px;font-size:13px;cursor:pointer}.osvs-reset{border:0;background:none;color:#04305e;text-decoration:underline;font-size:13px;cursor:pointer;padding:5px 4px}.osvs-f-tipp{font-size:13px;color:#7a8594;margin:-4px 0 14px}.osvs-ansehen{display:block;width:100%;margin:8px 0}@media (max-width:767px){.osvs-kats{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.osvs-leiste{gap:8px}.osvs-dd-knopf{padding:6px 10px;font-size:13px}.osvs-schalter{font-size:13px}.osvs-sortierung{margin-left:0;width:100%}.osvs-sortierung label{display:inline}.osvs-sort{flex:1}.osvs-dd{position:static}.osvs-leiste{position:relative}.osvs-dd-panel{left:0;right:0;max-width:none;min-width:0}}"; document.head.appendChild(st); })();
+  (function () { var st = document.createElement("style"); st.id = "osvs-css"; st.textContent = "/* Ceres-Vorschlaege ausblenden, sobald unsere Suche bereit ist; nur bei 'nichts gefunden' (osvs-ceres) zeigen */body.osvs-bereit:not(.osvs-ceres) .autocomplete-suggestions{display:none!important}.osvs-panel{display:none;position:absolute;top:100%;left:0;right:0;z-index:1100;background:#fff;border:1px solid #e3e0d9;border-radius:0 0 6px 6px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:75vh;overflow-y:auto;text-align:left}.osvs-hinweis{padding:8px 12px;font-size:13px;background:#fffbeb;color:#7c4a03;border-bottom:1px solid #f0e6c8}.osvs-hit{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0ede6;color:#1d2433;text-decoration:none}.osvs-hit:hover,.osvs-hit.osvs-sel{background:#f7f5f0;text-decoration:none;color:#1d2433}.osvs-hit img{width:48px;height:48px;object-fit:contain;flex:0 0 48px;background:#fff}.osvs-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.3}.osvs-n{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis}.osvs-v{font-size:12px;color:#6b7280}.osvs-p{flex:0 0 auto;font-weight:600;font-size:14px;white-space:nowrap}.osvs-uvp{color:#9ca3af;font-weight:400;margin-right:4px}.osvs-panel mark{background:#fde68a;padding:0;color:inherit}.osvs-mehr{background:#f7f5f0}.osvs-alle{display:block;padding:10px 12px;font-size:14px;color:#1f3a5f;font-weight:600}@media (max-width:767px){.osvs-panel{border-radius:6px;max-height:65vh}.osvs-hit img{width:44px;height:44px;flex-basis:44px}.osvs-n{font-size:14px;white-space:normal}.osvs-txt{word-break:normal;hyphens:auto}}/* Ergebnisseite: Plentys Raster, Toolbar, Filter und Seitenblaettern ausblenden, solange unser Widget Treffer zeigt */body.osvs-ergebnis-aktiv .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),body.osvs-ergebnis-aktiv .widget-pagination,body.osvs-ergebnis-aktiv .widget-toolbar,body.osvs-ergebnis-aktiv .widget-selected-filter,body.osvs-ergebnis-aktiv .widget-filter-base,body.osvs-ergebnis-aktiv .widget-items-per-page,body.osvs-ergebnis-aktiv .widget-item-sorting{display:none!important}.osvs-ergebnis-zahl{font-weight:600;margin:0 0 8px}.osvs-ergebnis .osvs-hinweis{display:inline-block;border-radius:4px;margin:0 0 12px}.osvs-ergebnis-fuss{margin:16px 0 24px}.osvs-kopf-zeile .osvs-ergebnis-zahl{font-size:15px;color:#555;margin:0 0 10px}.osvs-kats{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;margin:0 0 4px;scrollbar-width:thin}.osvs-kat{flex:0 0 auto;border:1px solid #c9ced6;background:#fff;color:#04305e;border-radius:20px;padding:7px 16px;font-size:14px;cursor:pointer;white-space:nowrap;transition:background .15s}.osvs-kat:hover{border-color:#04305e}.osvs-kat small{margin-left:6px;color:#7a8594;font-size:12px}.osvs-kat-an{background:#04305e;color:#fff;border-color:#04305e}.osvs-kat-an small{color:#c8d3e6}.osvs-leiste{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #e3e6ea;border-bottom:1px solid #e3e6ea;margin-bottom:12px}.osvs-dd{position:relative}.osvs-dd-knopf{border:1px solid #c9ced6;background:#fff;color:#212529;border-radius:4px;padding:7px 12px;font-size:14px;cursor:pointer;white-space:nowrap}.osvs-dd-knopf:hover,.osvs-dd-auf .osvs-dd-knopf{border-color:#04305e}.osvs-dd-aktiv{border-color:#04305e;color:#04305e;font-weight:600}.osvs-dd-zahl{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#04305e;color:#fff;font-size:11px;text-align:center;margin-left:4px}.osvs-dd-pfeil{font-size:11px;margin-left:4px;color:#7a8594}.osvs-dd-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:50;background:#fff;border:1px solid #d5dae1;border-radius:6px;box-shadow:0 10px 28px rgba(0,0,0,.14);padding:8px;min-width:240px;max-width:340px;max-height:320px;overflow-y:auto}.osvs-dd-auf .osvs-dd-panel{display:block}.osvs-opt{display:flex;align-items:center;gap:8px;margin:0;padding:6px 8px;border-radius:4px;font-size:14px;cursor:pointer}.osvs-opt:hover{background:#f3f5f8}.osvs-opt span{flex:1}.osvs-opt small{color:#7a8594}.osvs-preis{display:flex;align-items:center;gap:8px;padding:4px}.osvs-preis input{width:100px}.osvs-schalter{display:inline-flex;align-items:center;gap:8px;margin:0;font-size:14px;cursor:pointer}.osvs-sortierung{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:14px}.osvs-sortierung label{margin:0;color:#555}.osvs-sort{border:1px solid #c9ced6;border-radius:4px;padding:6px 8px;font-size:14px;background:#fff}.osvs-marken{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}.osvs-marke{border:0;background:#e8eef6;color:#04305e;border-radius:16px;padding:5px 12px;font-size:13px;cursor:pointer}.osvs-reset{border:0;background:none;color:#04305e;text-decoration:underline;font-size:13px;cursor:pointer;padding:5px 4px}.osvs-f-tipp{font-size:13px;color:#7a8594;margin:-4px 0 14px}.osvs-ansehen{display:block;width:100%;margin:8px 0}@media (max-width:767px){.osvs-kats{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.osvs-leiste{gap:8px}.osvs-dd-knopf{padding:6px 10px;font-size:13px}.osvs-schalter{font-size:13px}.osvs-sortierung{margin-left:0;width:100%}.osvs-sortierung label{display:inline}.osvs-sort{flex:1}.osvs-dd{position:static}.osvs-leiste{position:relative}.osvs-dd-panel{left:0;right:0;max-width:none;min-width:0}}/* Sofort-Ergebnisse als Ebene */.osvs-sofort{position:fixed;left:0;right:0;bottom:0;z-index:1040;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 0 40px}.osvs-sofort .container-max{padding:0 15px}.osvs-sofort-kopf{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px}.osvs-sofort-kopf h1{margin:0}.osvs-sofort-zu{border:0;background:#f2f4f7;border-radius:50%;width:40px;height:40px;font-size:24px;line-height:40px;cursor:pointer;flex:0 0 40px}html.osvs-sofort-offen body{overflow:hidden}"; document.head.appendChild(st); })();
   var INDEX_URL = "/rest/osv-suche/index", PREIS_URL = "/rest/osv-suche/preise", SUCH_URL = "/artikelsuchergebnisse/?query=";
   var CACHE_KEY = "osvsuche_index_v1", CACHE_MS = 60 * 60 * 1000, MAX = 8;
   var st = { laden: null, ms: null, docs: null, byId: null, cfg: null, panel: null, input: null, sel: -1, items: [], q: "" };
@@ -2358,7 +2358,13 @@
     }, 60);
   }, true);
   document.addEventListener("keydown", function (ev) {
-    var t = ev.target; if (!istSuchfeld(t) || !st.panel || st.panel.style.display !== "block") return;
+    var t = ev.target; if (!istSuchfeld(t)) return;
+    var offen = st.panel && st.panel.style.display === "block";
+    if (ev.key === "Enter" && !(offen && st.sel >= 0) && st.ms && t.value.trim().length >= 2) {
+      ev.preventDefault(); ev.stopImmediatePropagation(); st.halteEnter = true;
+      sofort(t.value, t); return;
+    }
+    if (!offen) return;
     if (ev.key === "ArrowDown") { ev.preventDefault(); markieren(st.sel + 1); }
     else if (ev.key === "ArrowUp") { ev.preventDefault(); markieren(st.sel - 1); }
     else if (ev.key === "Escape") { schliessen(); }
@@ -2367,12 +2373,7 @@
       st.gehe = st.items[st.sel].d.u;
       window.location.href = st.gehe;
     }
-    else if (ev.key === "Enter" && st.fuerPlenty && st.fuerPlenty !== t.value.trim()) {
-      // Tippfehler korrigiert: die Ergebnisseite mit dem richtigen Wort aufrufen
-      ev.preventDefault(); ev.stopImmediatePropagation();
-      st.gehe = SUCH_URL + encodeURIComponent(st.fuerPlenty);
-      window.location.href = st.gehe;
-    }
+
   }, true);
   // Ceres sucht beim Loslassen von Enter (keyup) – das unterdruecken, wenn wir schon einen Artikel oeffnen
   ["keyup", "keypress"].forEach(function (typ) {
@@ -2384,6 +2385,13 @@
     }, true);
   });
   document.addEventListener("click", function (ev) {
+    var alleL = ev.target && ev.target.closest && ev.target.closest(".osvs-panel .osvs-alle");
+    if (alleL && st.ms && st.input) { ev.preventDefault(); ev.stopImmediatePropagation(); sofort(st.input.value, st.input); return; }
+    var lupe = ev.target && ev.target.closest && ev.target.closest(".search-submit");
+    if (lupe && st.ms) {
+      var feld = lupe.closest("form, .position-relative, div") && lupe.parentNode.querySelector("input.search-input");
+      if (feld && feld.value.trim().length >= 2) { ev.preventDefault(); ev.stopImmediatePropagation(); sofort(feld.value, feld); return; }
+    }
     var mehr = ev.target && ev.target.closest && ev.target.closest(".osvs-mehr");
     if (mehr && st.panel && st.panel.contains(mehr)) { ev.preventDefault(); ev.stopImmediatePropagation(); zeichnen(st.panel, st.q, true); if (st.input) st.input.focus(); return; }
   }, true);
@@ -2416,17 +2424,15 @@
   function preisZahl(t) { var m = String(t || "").replace(/\./g, "").replace(",", ".").match(/[\d.]+/); return m ? parseFloat(m[0]) : 0; }
   // Wie in der PWA (filters.config.ts): Sammelkategorien zaehlen nicht als "passende Kategorie"
   var KAT_AUSNAHMEN = { 290: 1, 261: 1 }, KAT_MAX = 6;
-  function ergebnisseite() {
-    var el = document.querySelector("[data-osvs-ergebnis]"); if (!el) return;
-    var q = (new URLSearchParams(window.location.search).get("query") || "").trim();
-    if (q.length < 2) return;
+  function ergebnisRendern(el, q, leer) {
+    leer = leer || function () { el.style.display = "none"; document.body.classList.add("osvs-aus"); };
     laden().then(function () {
       var hinweis = "", alle = [], k = meinten(q);
       if (k && k.terms.length) {
         alle = suchen(k.terms.join(" "), true);
         if (alle.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
       } else if (!k) alle = suchen(q, true);
-      if (!alle.length) { el.style.display = "none"; document.body.classList.add("osvs-aus"); return; } // Plentys Seite bleibt stehen
+      if (!alle.length) { leer(); return; } // Plentys Seite bleibt stehen
       alle.forEach(function (x, i) { x.rang = i; x.preis = preisZahl(x.d.p); });
       // Passende Kategorien: Standardkategorie je Treffer, nach Anzahl, ohne Sammelkategorien
       var katZahl = {}, katName = {};
@@ -2558,9 +2564,83 @@
       document.body.classList.add("osvs-ergebnis-aktiv");
       schliessen();
       zeichneKopf(); anwenden();
-    }).catch(function () { el.style.display = "none"; document.body.classList.add("osvs-aus"); });
+    }).catch(function () { leer(); });
+  }
+  function ergebnisseite() {
+    var el = document.querySelector("[data-osvs-ergebnis]"); if (!el) return;
+    var q = (new URLSearchParams(window.location.search).get("query") || "").trim();
+    if (q.length < 2) return;
+    ergebnisRendern(el, q);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.8.1" };
+  // ---------- Sofort-Ergebnisse bei Enter: kein Neuladen der Seite ----------
+  var GERUEST = '<div class="osvs-ergebnis-kopf"></div><div class="widget widget-item-grid widget-primary item-vat-hidden"><ul class="widget-inner row product-list grid osvs-ergebnis-liste"></ul></div><div class="osvs-ergebnis-fuss text-center"></div>';
+  function frischesWidget(alt) {
+    var neu = document.createElement("div");
+    neu.className = alt ? alt.className : "widget osvs-ergebnis";
+    neu.setAttribute("data-osvs-ergebnis", "");
+    neu.innerHTML = GERUEST;
+    if (alt) alt.parentNode.replaceChild(neu, alt);
+    return neu;
+  }
+  function ueberschrift(q) {
+    var h = [].filter.call(document.querySelectorAll("h1"), function (x) { return /Suchergebnisse/.test(x.textContent); })[0];
+    if (h) h.textContent = "Suchergebnisse für: " + q;
+  }
+  var schicht = null;
+  function schichtZu() {
+    if (!schicht) return;
+    schicht.remove(); schicht = null;
+    document.documentElement.classList.remove("osvs-sofort-offen");
+  }
+  function sofort(q, eingabe) {
+    q = (q || "").trim(); if (q.length < 2) return false;
+    var plenty = function () { var k = meinten(q); var w = k && k.terms.length ? k.terms.map(function (x) { return VSHOW[x] || x; }).join(" ") : q; window.location.href = SUCH_URL + encodeURIComponent(w); };
+    var url = SUCH_URL + encodeURIComponent(q);
+    if (eingabe) eingabe.blur();
+    schliessen();
+    var hier = document.querySelector("[data-osvs-ergebnis]");
+    if (hier && !schicht) {
+      // schon auf der Ergebnisseite: Treffer an Ort und Stelle austauschen
+      document.body.classList.remove("osvs-aus");
+      var el = frischesWidget(hier); el.style.display = "";
+      ueberschrift(q);
+      history.pushState({ osvs: q }, "", url);
+      ergebnisRendern(el, q, plenty);
+      window.scrollTo(0, 0);
+      return true;
+    }
+    // auf jeder anderen Seite: Ergebnisse als Ebene ueber dem Inhalt, unter dem Kopf
+    schichtZu();
+    var kopfHoehe = 0, h = document.getElementById("page-header");
+    if (h) kopfHoehe = Math.max(0, h.getBoundingClientRect().bottom);
+    schicht = document.createElement("div");
+    schicht.className = "osvs-sofort";
+    schicht.style.top = kopfHoehe + "px";
+    schicht.innerHTML = '<div class="container-max"><div class="osvs-sofort-kopf"><h1 class="h2">Suchergebnisse für: ' + esc(q) + '</h1><button type="button" class="osvs-sofort-zu" aria-label="Schließen">×</button></div></div>';
+    var el2 = frischesWidget(null);
+    schicht.firstChild.appendChild(el2);
+    document.body.appendChild(schicht);
+    document.documentElement.classList.add("osvs-sofort-offen");
+    if (!history.state || !history.state.osvs) history.pushState({ osvs: q, ebene: true }, "", url);
+    else history.replaceState({ osvs: q, ebene: true }, "", url);
+    ergebnisRendern(el2, q, function () { schichtZu(); plenty(); });
+    return true;
+  }
+  document.addEventListener("click", function (ev) {
+    if (ev.target.closest && ev.target.closest(".osvs-sofort-zu")) { ev.preventDefault(); history.back(); }
+  });
+  window.addEventListener("popstate", function (ev) {
+    if (ev.state && ev.state.osvs) {
+      var hier = document.querySelector(".osvs-sofort [data-osvs-ergebnis]") || document.querySelector("[data-osvs-ergebnis]");
+      if (hier) { var el = frischesWidget(hier); ueberschrift(ev.state.osvs); ergebnisRendern(el, ev.state.osvs); }
+      return;
+    }
+    if (schicht) { schichtZu(); return; }
+    // zurueck auf eine Ergebnis-Adresse ohne eigenen Zustand: Seite neu laden
+    if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
+  });
+
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.0" };
 })();
