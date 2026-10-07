@@ -1,11 +1,26 @@
 <style>
 /* OSVSuche: Auf der Ergebnisseite Plentys Liste von Anfang an ausblenden, solange unsere Ergebnisse laden.
    body.osvs-aus = unsere Suche hat nichts gefunden oder ist ausgefallen -> Plentys Seite bleibt sichtbar. */
-body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),
-body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-pagination,
-body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-toolbar,
-body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-selected-filter,
-body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-filter-base{display:none!important}
+html:not(.osvs-aus-html) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),
+html:not(.osvs-aus-html) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-pagination,
+html:not(.osvs-aus-html) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-toolbar,
+html:not(.osvs-aus-html) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-selected-filter,
+html:not(.osvs-aus-html) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-filter-base{display:none!important}
 body:not(.osvs-ergebnis-aktiv):not(.osvs-aus) .osvs-ergebnis{min-height:60vh}
 body:not(.osvs-ergebnis-aktiv):not(.osvs-aus) .osvs-ergebnis-kopf::before{content:"Suchergebnisse werden geladen …";display:block;color:#7a8594;font-size:15px;padding:8px 0}
 </style>
+<script>
+/* OSVSuche: Version und (auf der Ergebnisseite) Index so frueh wie moeglich anfordern */
+(function(){
+  window.__osvsVer=fetch("/rest/osv-suche/version",{credentials:"same-origin"}).then(function(r){return r.json();});
+  if(/\/artikelsuchergebnisse/.test(location.pathname)){
+    var c=null;try{c=JSON.parse(localStorage.getItem("osvsuche_index_v1")||"null");}catch(e){}
+    var holen=function(){return fetch("/rest/osv-suche/index",{credentials:"same-origin"}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();});};
+    // ohne gespeicherten Index sofort parallel laden; mit gespeichertem erst den Stand pruefen
+    window.__osvsIndex=(c&&c.d&&c.d._meta&&Date.now()-c.t<36e5)
+      ?window.__osvsVer.then(function(j){return (j.s&&c.d._meta.erzeugt===j.s)?c.d:holen();},holen)
+      :holen();
+    window.__osvsIndex.catch(function(){document.documentElement.className+=" osvs-aus-html";});
+  }
+})();
+</script>

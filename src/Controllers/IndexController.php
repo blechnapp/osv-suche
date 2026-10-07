@@ -25,7 +25,8 @@ class IndexController extends Controller
     const SALES_KEY  = 'verkauf.json';
     const FACET_KEY  = 'facetten.json';
     const MAX_IDS    = 24;
-    const VERSION    = '0.8.0';
+    const VERSION    = '0.8.1';
+    const STAND_KEY  = 'stand.txt';
 
     /** @var array Kategoriepfade je ID, beim Neuaufbau gefuellt */
     private $katCache = [];
@@ -104,6 +105,8 @@ class IndexController extends Controller
         $body = json_encode(['_meta' => $meta, '_cfg' => $this->regeln($config), '_fw' => (object)($facetten['werte'] ?? []), 'docs' => $docs], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         $storage->uploadObject(self::PLUGIN, self::FILE_KEY, $body);
+        // kleiner Zeitstempel, damit Browser einen neuen Index sofort erkennen
+        $storage->uploadObject(self::PLUGIN, self::STAND_KEY, (string)$meta['erzeugt']);
 
         $meta['bytes'] = strlen($body);
         $meta['ok'] = true;
@@ -339,6 +342,12 @@ class IndexController extends Controller
     /** Version des Plugins, damit die feste Vorlage im Shop immer das aktuelle Skript laedt */
     public function version(Response $response)
     {
-        return $response->make('{"v":"' . self::VERSION . '"}', 200, ['Content-Type' => 'application/json']);
+        $stand = '';
+        /** @var StorageRepositoryContract $storage */
+        $storage = pluginApp(StorageRepositoryContract::class);
+        if ($storage->doesObjectExist(self::PLUGIN, self::STAND_KEY)) {
+            $stand = (string)$storage->getObject(self::PLUGIN, self::STAND_KEY)->body;
+        }
+        return $response->make(json_encode(['v' => self::VERSION, 's' => $stand]), 200, ['Content-Type' => 'application/json']);
     }
 }

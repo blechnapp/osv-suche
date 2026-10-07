@@ -157,7 +157,9 @@
     st.laden = new Promise(function (ok, fehler) {
       try {
         var c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
-        if (c && c.t && Date.now() - c.t < CACHE_MS && c.d && c.d.docs) { aufbauen(c.d); return ok(); }
+        var stand = window.__osvsStand || "";
+        // gespeicherten Index nur nehmen, wenn er zum aktuellen Stand passt (neuer Index -> sofort neu laden)
+        if (c && c.t && Date.now() - c.t < CACHE_MS && c.d && c.d.docs && (!stand || (c.d._meta && c.d._meta.erzeugt === stand))) { aufbauen(c.d); return ok(); }
       } catch (e) { /* kein Speicher, egal */ }
       (window.__osvsIndex || fetch(INDEX_URL, { credentials: "same-origin" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }))
         .then(function (d) {
@@ -299,7 +301,7 @@
           (x.n > 1 ? " · +" + (x.n - 1) + " weitere Ausführungen" : "") + "</span></span>" +
           '<span class="osvs-p" data-id="' + d.id + '">' + esc(d.p) + "</span></a>";
       }).join("") +
-      '<a class="osvs-alle" href="' + SUCH_URL + encodeURIComponent(st.fuerPlenty) + '">Alle ' + items.length + " Artikel anzeigen →</a>";
+      '<a class="osvs-alle" href="' + SUCH_URL + encodeURIComponent(st.fuerPlenty) + '">Alle ' + items.reduce(function (a, x) { return a + x.n; }, 0) + " Artikel anzeigen →</a>";
     if (alle) p.scrollTop = 0;
     preiseNachladen(list);
   }
@@ -545,5 +547,5 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.8.0" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.8.1" };
 })();

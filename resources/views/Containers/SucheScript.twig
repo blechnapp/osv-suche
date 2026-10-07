@@ -1,7 +1,8 @@
 <script>
 (function(){var b="{{ plugin_path('OSVSuche') }}/js/osvsuche.js";
-if(document.querySelector("[data-osvs-ergebnis]")){window.__osvsIndex=fetch("/rest/osv-suche/index",{credentials:"same-origin"}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();});window.__osvsIndex.catch(function(){document.body.classList.add("osvs-aus");});}
 function lade(v){var s=document.createElement("script");s.src=b+"?v="+encodeURIComponent(v);s.defer=true;s.onerror=function(){document.body.classList.add("osvs-aus");};document.head.appendChild(s);}
-fetch("/rest/osv-suche/version",{credentials:"same-origin"}).then(function(r){return r.json();}).then(function(j){lade(j.v||"x");}).catch(function(){lade(String(Math.floor(Date.now()/36e5)));});
+var ver=window.__osvsVer||fetch("/rest/osv-suche/version",{credentials:"same-origin"}).then(function(r){return r.json();});
+ver.then(function(j){window.__osvsStand=j.s||"";lade(j.v||"x");}).catch(function(){lade(String(Math.floor(Date.now()/36e5)));});
+if(window.__osvsIndex){window.__osvsIndex.catch(function(){document.body.classList.add("osvs-aus");});}
 })();
 </script>
