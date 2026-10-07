@@ -25,7 +25,7 @@ class IndexController extends Controller
     const SALES_KEY  = 'verkauf.json';
     const FACET_KEY  = 'facetten.json';
     const MAX_IDS    = 24;
-    const VERSION    = '0.9.1';
+    const VERSION    = '0.9.2';
     const STAND_KEY  = 'stand.txt';
 
     /** @var array Kategoriepfade je ID, beim Neuaufbau gefuellt */
@@ -87,6 +87,9 @@ class IndexController extends Controller
                 $vid = (string)$doc['id'];
                 $doc['fa'] = isset($facetten['v'][$vid]) ? $facetten['v'][$vid] : [];
                 $doc['sw'] = isset($facetten['sw'][$vid]) ? (string)$facetten['sw'][$vid] : '';
+                if (!empty($facetten['ean'][$vid])) {
+                    $doc['e'] = (string)$facetten['ean'][$vid];
+                }
                 $docs[] = $doc;
             }
             $pageTimes[] = (int)round((microtime(true) - $t0) * 1000);
@@ -215,10 +218,17 @@ class IndexController extends Controller
                 $sw[(string)$vid] = mb_substr((string)$woerter, 0, 200);
             }
         }
+        // EAN je Variante (Leerzeichen-getrennt), damit die Suche auch Strichcodes findet
+        $ean = [];
+        if (isset($data['ean']) && is_array($data['ean'])) {
+            foreach ($data['ean'] as $vid => $codes) {
+                $ean[(string)$vid] = mb_substr(preg_replace('/[^0-9 ]/', '', (string)$codes), 0, 120);
+            }
+        }
         /** @var StorageRepositoryContract $storage */
         $storage = pluginApp(StorageRepositoryContract::class);
-        $storage->uploadObject(self::PLUGIN, self::FACET_KEY, json_encode(['werte' => (object)$werte, 'v' => (object)$v, 'sw' => (object)$sw], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        return ['ok' => true, 'werte' => count($werte), 'varianten' => count($v), 'stilwoerter' => count($sw), 'gespeichert' => date('c')];
+        $storage->uploadObject(self::PLUGIN, self::FACET_KEY, json_encode(['werte' => (object)$werte, 'v' => (object)$v, 'sw' => (object)$sw, 'ean' => (object)$ean], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        return ['ok' => true, 'werte' => count($werte), 'varianten' => count($v), 'stilwoerter' => count($sw), 'ean' => count($ean), 'gespeichert' => date('c')];
     }
 
     private function tokenOk(Request $request, ConfigRepository $config): bool

@@ -2021,7 +2021,7 @@
   "use strict";
   if (window.OSVSuche) return;
   (function () { var st = document.createElement("style"); st.id = "osvs-css"; st.textContent = "/* Ceres-Vorschlaege ausblenden, sobald unsere Suche bereit ist; nur bei 'nichts gefunden' (osvs-ceres) zeigen */body.osvs-bereit:not(.osvs-ceres) .autocomplete-suggestions{display:none!important}.osvs-panel{display:none;position:absolute;top:100%;left:0;right:0;z-index:1100;background:#fff;border:1px solid #e3e0d9;border-radius:0 0 6px 6px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:75vh;overflow-y:auto;text-align:left}.osvs-hinweis{padding:8px 12px;font-size:13px;background:#fffbeb;color:#7c4a03;border-bottom:1px solid #f0e6c8}.osvs-hit{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0ede6;color:#1d2433;text-decoration:none}.osvs-hit:hover,.osvs-hit.osvs-sel{background:#f7f5f0;text-decoration:none;color:#1d2433}.osvs-hit img{width:48px;height:48px;object-fit:contain;flex:0 0 48px;background:#fff}.osvs-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.3}.osvs-n{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis}.osvs-v{font-size:12px;color:#6b7280}.osvs-p{flex:0 0 auto;font-weight:600;font-size:14px;white-space:nowrap}.osvs-uvp{color:#9ca3af;font-weight:400;margin-right:4px}.osvs-panel mark{background:#fde68a;padding:0;color:inherit}.osvs-mehr{background:#f7f5f0}.osvs-alle{display:block;padding:10px 12px;font-size:14px;color:#1f3a5f;font-weight:600}@media (max-width:767px){.osvs-panel{border-radius:6px;max-height:65vh}.osvs-hit img{width:44px;height:44px;flex-basis:44px}.osvs-n{font-size:14px;white-space:normal}.osvs-txt{word-break:normal;hyphens:auto}}/* Ergebnisseite: Plentys Raster, Toolbar, Filter und Seitenblaettern ausblenden, solange unser Widget Treffer zeigt */body.osvs-ergebnis-aktiv .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),body.osvs-ergebnis-aktiv .widget-pagination,body.osvs-ergebnis-aktiv .widget-toolbar,body.osvs-ergebnis-aktiv .widget-selected-filter,body.osvs-ergebnis-aktiv .widget-filter-base,body.osvs-ergebnis-aktiv .widget-items-per-page,body.osvs-ergebnis-aktiv .widget-item-sorting{display:none!important}.osvs-ergebnis-zahl{font-weight:600;margin:0 0 8px}.osvs-ergebnis .osvs-hinweis{display:inline-block;border-radius:4px;margin:0 0 12px}.osvs-ergebnis-fuss{margin:16px 0 24px}.osvs-kopf-zeile .osvs-ergebnis-zahl{font-size:15px;color:#555;margin:0 0 10px}.osvs-kats{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;margin:0 0 4px;scrollbar-width:thin}.osvs-kat{flex:0 0 auto;border:1px solid #c9ced6;background:#fff;color:#04305e;border-radius:20px;padding:7px 16px;font-size:14px;cursor:pointer;white-space:nowrap;transition:background .15s}.osvs-kat:hover{border-color:#04305e}.osvs-kat small{margin-left:6px;color:#7a8594;font-size:12px}.osvs-kat-an{background:#04305e;color:#fff;border-color:#04305e}.osvs-kat-an small{color:#c8d3e6}.osvs-leiste{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #e3e6ea;border-bottom:1px solid #e3e6ea;margin-bottom:12px}.osvs-dd{position:relative}.osvs-dd-knopf{border:1px solid #c9ced6;background:#fff;color:#212529;border-radius:4px;padding:7px 12px;font-size:14px;cursor:pointer;white-space:nowrap}.osvs-dd-knopf:hover,.osvs-dd-auf .osvs-dd-knopf{border-color:#04305e}.osvs-dd-aktiv{border-color:#04305e;color:#04305e;font-weight:600}.osvs-dd-zahl{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#04305e;color:#fff;font-size:11px;text-align:center;margin-left:4px}.osvs-dd-pfeil{font-size:11px;margin-left:4px;color:#7a8594}.osvs-dd-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:50;background:#fff;border:1px solid #d5dae1;border-radius:6px;box-shadow:0 10px 28px rgba(0,0,0,.14);padding:8px;min-width:240px;max-width:340px;max-height:320px;overflow-y:auto}.osvs-dd-auf .osvs-dd-panel{display:block}.osvs-opt{display:flex;align-items:center;gap:8px;margin:0;padding:6px 8px;border-radius:4px;font-size:14px;cursor:pointer}.osvs-opt:hover{background:#f3f5f8}.osvs-opt span{flex:1}.osvs-opt small{color:#7a8594}.osvs-preis{display:flex;align-items:center;gap:8px;padding:4px}.osvs-preis input{width:100px}.osvs-schalter{display:inline-flex;align-items:center;gap:8px;margin:0;font-size:14px;cursor:pointer}.osvs-sortierung{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:14px}.osvs-sortierung label{margin:0;color:#555}.osvs-sort{border:1px solid #c9ced6;border-radius:4px;padding:6px 8px;font-size:14px;background:#fff}.osvs-marken{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}.osvs-marke{border:0;background:#e8eef6;color:#04305e;border-radius:16px;padding:5px 12px;font-size:13px;cursor:pointer}.osvs-reset{border:0;background:none;color:#04305e;text-decoration:underline;font-size:13px;cursor:pointer;padding:5px 4px}.osvs-f-tipp{font-size:13px;color:#7a8594;margin:-4px 0 14px}.osvs-ansehen{display:block;width:100%;margin:8px 0}@media (max-width:767px){.osvs-kats{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.osvs-leiste{gap:8px}.osvs-dd-knopf{padding:6px 10px;font-size:13px}.osvs-schalter{font-size:13px}.osvs-sortierung{margin-left:0;width:100%}.osvs-sortierung label{display:inline}.osvs-sort{flex:1}.osvs-dd{position:static}.osvs-leiste{position:relative}.osvs-dd-panel{left:0;right:0;max-width:none;min-width:0}}/* Sofort-Ergebnisse als Ebene */.osvs-sofort{position:fixed;left:0;right:0;bottom:0;z-index:1040;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 0 40px}.osvs-sofort .container-max{padding:0 15px}.osvs-sofort-kopf{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px}.osvs-sofort-kopf h1{margin:0}.osvs-sofort-zu{border:0;background:#f2f4f7;border-radius:50%;width:40px;height:40px;font-size:24px;line-height:40px;cursor:pointer;flex:0 0 40px}html.osvs-sofort-offen body{overflow:hidden}.osvs-sofort-fussnote{padding:16px 0 110px}"; document.head.appendChild(st); })();
-  var INDEX_URL = "/rest/osv-suche/index", PREIS_URL = "/rest/osv-suche/preise", SUCH_URL = "/artikelsuchergebnisse/?query=";
+  var GA4_ID = "G-YV5JF3R917", INDEX_URL = "/rest/osv-suche/index", PREIS_URL = "/rest/osv-suche/preise", SUCH_URL = "/artikelsuchergebnisse/?query=";
   var CACHE_KEY = "osvsuche_index_v1", CACHE_MS = 60 * 60 * 1000, MAX = 8;
   var st = { laden: null, ms: null, docs: null, byId: null, cfg: null, panel: null, input: null, sel: -1, items: [], q: "" };
 
@@ -2160,7 +2160,7 @@
       });
     });
     st.ms = new MiniSearch({
-      idField: "id", fields: ["n", "v", "a", "nr", "h", "kat", "t", "fx", "kw", "sw"], storeFields: ["i", "h", "vk"],
+      idField: "id", fields: ["n", "v", "a", "nr", "e", "h", "kat", "t", "fx", "kw", "sw"], storeFields: ["i", "h", "vk"],
       processTerm: processTerm, tokenize: tokenize,
       extractField: function (d, f) { if (f === "t") return teile(d); if (f === "fx") return (d.fa || []).map(function (id) { var w = FW[id]; return w ? w[1] : ""; }).join(" "); return d[f] == null ? "" : String(d[f]); },
       searchOptions: { processTerm: queryTerm, tokenize: tokenize }
@@ -2199,7 +2199,7 @@
     var opts = function (mode) {
       return {
         boostTerm: function (term) { return HERKUNFT[term] ? 0.15 : 1; },
-        boost: { n: 3, v: 1.2, a: 1, kat: 4, h: 1, nr: 4, t: 1.0, fx: 0.8, kw: 0.5, sw: 0.5 },
+        boost: { n: 3, v: 1.2, a: 1, kat: 4, h: 1, nr: 4, e: 5, t: 1.0, fx: 0.8, kw: 0.5, sw: 0.5 },
         prefix: function (t) { return t.length >= 2 && !/^\d+$/.test(t); },
         fuzzy: fuzzy, combineWith: mode,
         boostDocument: function (id, term, sf) {
@@ -2424,7 +2424,7 @@
   function preisZahl(t) { var m = String(t || "").replace(/\./g, "").replace(",", ".").match(/[\d.]+/); return m ? parseFloat(m[0]) : 0; }
   // Wie in der PWA (filters.config.ts): Sammelkategorien zaehlen nicht als "passende Kategorie"
   var KAT_AUSNAHMEN = { 290: 1, 261: 1 }, KAT_MAX = 6;
-  function ergebnisRendern(el, q, leer) {
+  function ergebnisRendern(el, q, leer, gefunden) {
     leer = leer || function () { el.style.display = "none"; document.body.classList.add("osvs-aus"); };
     laden().then(function () {
       var hinweis = "", alle = [], k = meinten(q);
@@ -2433,6 +2433,7 @@
         if (alle.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
       } else if (!k) alle = suchen(q, true);
       if (!alle.length) { leer(); return; } // Plentys Seite bleibt stehen
+      if (gefunden) gefunden(alle.length);
       alle.forEach(function (x, i) { x.rang = i; x.preis = preisZahl(x.d.p); });
       // Passende Kategorien: Standardkategorie je Treffer, nach Anzahl, ohne Sammelkategorien
       var katZahl = {}, katName = {};
@@ -2588,6 +2589,20 @@
     var h = [].filter.call(document.querySelectorAll("h1"), function (x) { return /Suchergebnisse/.test(x.textContent); })[0];
     if (h) h.textContent = "Suchergebnisse für: " + q;
   }
+  // GA4: Suchen ohne Neuladen selbst melden (beim Seitenaufruf mit ?query= meldet GA4 sie von allein).
+  // Nur mit Einwilligung in Statistik, die der Shop im Cookie plenty-shop-cookie ablegt.
+  function gaErlaubt() {
+    try {
+      var m = document.cookie.match(/(?:^|; )plenty-shop-cookie=([^;]*)/); if (!m) return false;
+      var v = m[1]; try { v = decodeURIComponent(v); } catch (e) { /* schon lesbar */ }
+      var c = JSON.parse(v);
+      return !!(c && c.tracking && c.tracking.googleanalytics === true);
+    } catch (e) { return false; }
+  }
+  function gaSuche(q) {
+    if (typeof window.gtag !== "function" || !gaErlaubt()) return;
+    try { window.gtag("event", "view_search_results", { search_term: q, send_to: GA4_ID }); } catch (e) { /* Tracking darf die Suche nie stoeren */ }
+  }
   var schicht = null;
   function schichtZu() {
     if (!schicht) return;
@@ -2607,7 +2622,8 @@
       var el = frischesWidget(hier); el.style.display = "";
       ueberschrift(q);
       history.pushState({ osvs: q }, "", url);
-      ergebnisRendern(el, q, plenty);
+      // ohne Treffer meldet Plentys Seite die Suche selbst, deshalb nur bei eigenen Treffern melden
+      ergebnisRendern(el, q, plenty, function () { gaSuche(q); });
       window.scrollTo(0, 0);
       return true;
     }
@@ -2633,7 +2649,7 @@
     document.documentElement.classList.add("osvs-sofort-offen");
     if (!history.state || !history.state.osvs) history.pushState({ osvs: q, ebene: true }, "", url);
     else history.replaceState({ osvs: q, ebene: true }, "", url);
-    ergebnisRendern(el2, q, function () { schichtZu(); plenty(); });
+    ergebnisRendern(el2, q, function () { schichtZu(); plenty(); }, function () { gaSuche(q); });
     return true;
   }
   document.addEventListener("click", function (ev) {

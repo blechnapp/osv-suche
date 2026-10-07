@@ -6,7 +6,7 @@
   "use strict";
   if (window.OSVSuche) return;
   (function () { var st = document.createElement("style"); st.id = "osvs-css"; st.textContent = "/*CSS*/"; document.head.appendChild(st); })();
-  var INDEX_URL = "/rest/osv-suche/index", PREIS_URL = "/rest/osv-suche/preise", SUCH_URL = "/artikelsuchergebnisse/?query=";
+  var GA4_ID = "G-YV5JF3R917", INDEX_URL = "/rest/osv-suche/index", PREIS_URL = "/rest/osv-suche/preise", SUCH_URL = "/artikelsuchergebnisse/?query=";
   var CACHE_KEY = "osvsuche_index_v1", CACHE_MS = 60 * 60 * 1000, MAX = 8;
   var st = { laden: null, ms: null, docs: null, byId: null, cfg: null, panel: null, input: null, sel: -1, items: [], q: "" };
 
@@ -145,7 +145,7 @@
       });
     });
     st.ms = new MiniSearch({
-      idField: "id", fields: ["n", "v", "a", "nr", "h", "kat", "t", "fx", "kw", "sw"], storeFields: ["i", "h", "vk"],
+      idField: "id", fields: ["n", "v", "a", "nr", "e", "h", "kat", "t", "fx", "kw", "sw"], storeFields: ["i", "h", "vk"],
       processTerm: processTerm, tokenize: tokenize,
       extractField: function (d, f) { if (f === "t") return teile(d); if (f === "fx") return (d.fa || []).map(function (id) { var w = FW[id]; return w ? w[1] : ""; }).join(" "); return d[f] == null ? "" : String(d[f]); },
       searchOptions: { processTerm: queryTerm, tokenize: tokenize }
@@ -184,7 +184,7 @@
     var opts = function (mode) {
       return {
         boostTerm: function (term) { return HERKUNFT[term] ? 0.15 : 1; },
-        boost: { n: 3, v: 1.2, a: 1, kat: 4, h: 1, nr: 4, t: 1.0, fx: 0.8, kw: 0.5, sw: 0.5 },
+        boost: { n: 3, v: 1.2, a: 1, kat: 4, h: 1, nr: 4, e: 5, t: 1.0, fx: 0.8, kw: 0.5, sw: 0.5 },
         prefix: function (t) { return t.length >= 2 && !/^\d+$/.test(t); },
         fuzzy: fuzzy, combineWith: mode,
         boostDocument: function (id, term, sf) {
@@ -409,7 +409,7 @@
   function preisZahl(t) { var m = String(t || "").replace(/\./g, "").replace(",", ".").match(/[\d.]+/); return m ? parseFloat(m[0]) : 0; }
   // Wie in der PWA (filters.config.ts): Sammelkategorien zaehlen nicht als "passende Kategorie"
   var KAT_AUSNAHMEN = { 290: 1, 261: 1 }, KAT_MAX = 6;
-  function ergebnisRendern(el, q, leer) {
+  function ergebnisRendern(el, q, leer, gefunden) {
     leer = leer || function () { el.style.display = "none"; document.body.classList.add("osvs-aus"); };
     laden().then(function () {
       var hinweis = "", alle = [], k = meinten(q);
@@ -418,6 +418,7 @@
         if (alle.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
       } else if (!k) alle = suchen(q, true);
       if (!alle.length) { leer(); return; } // Plentys Seite bleibt stehen
+      if (gefunden) gefunden(alle.length);
       alle.forEach(function (x, i) { x.rang = i; x.preis = preisZahl(x.d.p); });
       // Passende Kategorien: Standardkategorie je Treffer, nach Anzahl, ohne Sammelkategorien
       var katZahl = {}, katName = {};
@@ -573,6 +574,20 @@
     var h = [].filter.call(document.querySelectorAll("h1"), function (x) { return /Suchergebnisse/.test(x.textContent); })[0];
     if (h) h.textContent = "Suchergebnisse für: " + q;
   }
+  // GA4: Suchen ohne Neuladen selbst melden (beim Seitenaufruf mit ?query= meldet GA4 sie von allein).
+  // Nur mit Einwilligung in Statistik, die der Shop im Cookie plenty-shop-cookie ablegt.
+  function gaErlaubt() {
+    try {
+      var m = document.cookie.match(/(?:^|; )plenty-shop-cookie=([^;]*)/); if (!m) return false;
+      var v = m[1]; try { v = decodeURIComponent(v); } catch (e) { /* schon lesbar */ }
+      var c = JSON.parse(v);
+      return !!(c && c.tracking && c.tracking.googleanalytics === true);
+    } catch (e) { return false; }
+  }
+  function gaSuche(q) {
+    if (typeof window.gtag !== "function" || !gaErlaubt()) return;
+    try { window.gtag("event", "view_search_results", { search_term: q, send_to: GA4_ID }); } catch (e) { /* Tracking darf die Suche nie stoeren */ }
+  }
   var schicht = null;
   function schichtZu() {
     if (!schicht) return;
@@ -592,7 +607,8 @@
       var el = frischesWidget(hier); el.style.display = "";
       ueberschrift(q);
       history.pushState({ osvs: q }, "", url);
-      ergebnisRendern(el, q, plenty);
+      // ohne Treffer meldet Plentys Seite die Suche selbst, deshalb nur bei eigenen Treffern melden
+      ergebnisRendern(el, q, plenty, function () { gaSuche(q); });
       window.scrollTo(0, 0);
       return true;
     }
@@ -618,7 +634,7 @@
     document.documentElement.classList.add("osvs-sofort-offen");
     if (!history.state || !history.state.osvs) history.pushState({ osvs: q, ebene: true }, "", url);
     else history.replaceState({ osvs: q, ebene: true }, "", url);
-    ergebnisRendern(el2, q, function () { schichtZu(); plenty(); });
+    ergebnisRendern(el2, q, function () { schichtZu(); plenty(); }, function () { gaSuche(q); });
     return true;
   }
   document.addEventListener("click", function (ev) {
