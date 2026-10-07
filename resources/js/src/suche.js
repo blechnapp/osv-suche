@@ -431,6 +431,17 @@
           (aktiv ? ' <b class="osvs-dd-zahl">' + aktiv + "</b>" : "") + ' <span class="osvs-dd-pfeil">▾</span></button><div class="osvs-dd-panel">' + inhalt + "</div></div>";
       }
       var offen = "";
+      // Prueft alle aktiven Filter ausser der Gruppe "ohne" (fuer die Zahlen in dieser Gruppe)
+      function passt(x, ohne) {
+        var von = parseFloat(f.von), bis = parseFloat(f.bis);
+        if (ohne !== "her" && Object.keys(f.her).length && !f.her[x.d.h]) return false;
+        if (ohne !== "preis" && !isNaN(von) && x.preis < von) return false;
+        if (ohne !== "preis" && !isNaN(bis) && x.preis > bis) return false;
+        if (ohne !== "lief" && f.lief && !x.d.ok) return false;
+        var g = {}; Object.keys(f.fa).forEach(function (id) { var w = FW[id]; if (w && "fa:" + w[0] !== ohne) (g[w[0]] = g[w[0]] || {})[id] = 1; });
+        for (var gn in g) { if (!(x.d.fa || []).some(function (id) { return g[gn][id]; })) return false; }
+        return true;
+      }
       function zeichneKopf() {
         var b = basis(), mitMerkmalen = f.kat || kats.length <= 1;
         var html = '<div class="osvs-kopf-zeile"><p class="osvs-ergebnis-zahl"></p></div>' + (hinweis ? '<p class="osvs-hinweis">' + hinweis + "</p>" : "");
@@ -444,10 +455,20 @@
         if (mitMerkmalen) {
           // Facetten aus den Plenty-Eigenschaften (fa = Facettenwert-IDs je Variante), Reihenfolge wie im Shop
           var gruppen = {};
-          b.forEach(function (x) { (x.d.fa || []).forEach(function (id) { var w = FW[id]; if (!w) return; var g = gruppen[w[0]] = gruppen[w[0]] || { pos: w[2], werte: {} }; var e = g.werte[id] = g.werte[id] || { name: w[1], pos: w[3], n: 0 }; e.n++; }); });
+          // erst alle Facetten der Kategorie sammeln, dann je Gruppe unter den uebrigen Filtern zaehlen
+          b.forEach(function (x) { (x.d.fa || []).forEach(function (id) { var w = FW[id]; if (!w) return; gruppen[w[0]] = gruppen[w[0]] || { pos: w[2], werte: {} }; }); });
+          Object.keys(gruppen).forEach(function (gn) {
+            b.forEach(function (x) {
+              if (!passt(x, "fa:" + gn)) return;
+              (x.d.fa || []).forEach(function (id) { var w = FW[id]; if (!w || w[0] !== gn) return; var e = gruppen[gn].werte[id] = gruppen[gn].werte[id] || { name: w[1], pos: w[3], n: 0 }; e.n++; });
+            });
+            // gewaehlte Werte bleiben sichtbar, auch wenn sie gerade 0 Treffer haetten
+            Object.keys(f.fa).forEach(function (id) { var w = FW[id]; if (w && w[0] === gn && !gruppen[gn].werte[id]) gruppen[gn].werte[id] = { name: w[1], pos: w[3], n: 0 }; });
+          });
           Object.keys(gruppen).sort(function (a, c) { return gruppen[a].pos - gruppen[c].pos || a.localeCompare(c, "de"); }).forEach(function (fn) {
             var werte = Object.keys(gruppen[fn].werte).map(function (id) { var e = gruppen[fn].werte[id]; return [id, e.name, e.n, e.pos]; });
-            if (werte.length < 2) return;
+            var aktivHier = werte.some(function (w) { return f.fa[w[0]]; });
+            if (werte.length < 2 && !aktivHier) return;
             werte.sort(function (a, c) { return a[3] - c[3] || a[1].localeCompare(c[1], "de", { numeric: true }); });
             var aktiv = werte.filter(function (w) { return f.fa[w[0]]; }).length;
             leiste += knopf("fa:" + fn, fn, aktiv, werte.map(function (w) {
@@ -455,8 +476,9 @@
             }).join(""));
           });
         }
-        var hers = zaehlen(b, function (x) { return [x.d.h]; });
-        if (hers.length > 1) leiste += knopf("her", "Hersteller", Object.keys(f.her).length, hers.map(function (w) { return chip("her", w[0], w[1], f.her[w[0]]); }).join(""));
+        var hers = zaehlen(b.filter(function (x) { return passt(x, "her"); }), function (x) { return [x.d.h]; });
+        Object.keys(f.her).forEach(function (h) { if (!hers.some(function (w) { return w[0] === h; })) hers.push([h, 0]); });
+        if (hers.length > 1 || Object.keys(f.her).length) leiste += knopf("her", "Hersteller", Object.keys(f.her).length, hers.map(function (w) { return chip("her", w[0], w[1], f.her[w[0]]); }).join(""));
         leiste += knopf("preis", "Preis", (f.von || f.bis) ? 1 : 0,
           '<div class="osvs-preis"><input type="number" min="0" inputmode="decimal" class="form-control osvs-von" placeholder="von €" value="' + esc(f.von) + '"><span>–</span><input type="number" min="0" inputmode="decimal" class="form-control osvs-bis" placeholder="bis €" value="' + esc(f.bis) + '"></div>');
         leiste += '<label class="osvs-schalter"><input type="checkbox" class="osvs-lief"' + (f.lief ? " checked" : "") + "><span>Nur sofort lieferbar</span></label>";
@@ -474,17 +496,7 @@
         kopf.querySelector(".osvs-sort").value = f.sort;
       }
       function anwenden() {
-        var he = Object.keys(f.her), von = parseFloat(f.von), bis = parseFloat(f.bis);
-        // innerhalb einer Facette ODER, zwischen Facetten UND (wie Plenty)
-        var faGruppen = {}; Object.keys(f.fa).forEach(function (id) { var w = FW[id]; if (w) (faGruppen[w[0]] = faGruppen[w[0]] || {})[id] = 1; });
-        treffer = basis().filter(function (x) {
-          if (he.length && !f.her[x.d.h]) return false;
-          if (!isNaN(von) && x.preis < von) return false;
-          if (!isNaN(bis) && x.preis > bis) return false;
-          if (f.lief && !x.d.ok) return false;
-          for (var g in faGruppen) { if (!(x.d.fa || []).some(function (id) { return faGruppen[g][id]; })) return false; }
-          return true;
-        });
+        treffer = basis().filter(function (x) { return passt(x, ""); });
         var cmp = { rel: function (a, b) { return a.rang - b.rang; }, pa: function (a, b) { return a.preis - b.preis; }, pd: function (a, b) { return b.preis - a.preis; }, az: function (a, b) { return a.d.n.localeCompare(b.d.n, "de"); } }[f.sort];
         treffer.sort(cmp);
         kopf.querySelector(".osvs-ergebnis-zahl").textContent = treffer.length + " Artikel für „" + q + "“" + (f.kat ? " in " + katName[f.kat] : "");
@@ -533,5 +545,5 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.7.1" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.7.2" };
 })();
