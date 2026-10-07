@@ -25,7 +25,7 @@ class IndexController extends Controller
     const SALES_KEY  = 'verkauf.json';
     const FACET_KEY  = 'facetten.json';
     const MAX_IDS    = 24;
-    const VERSION    = '0.7.2';
+    const VERSION    = '0.8.0';
 
     /** @var array Kategoriepfade je ID, beim Neuaufbau gefuellt */
     private $katCache = [];
@@ -85,6 +85,7 @@ class IndexController extends Controller
                 $doc['vk'] = isset($sales[$nr]) ? round((float)$sales[$nr], 1) : 0;
                 $vid = (string)$doc['id'];
                 $doc['fa'] = isset($facetten['v'][$vid]) ? $facetten['v'][$vid] : [];
+                $doc['sw'] = isset($facetten['sw'][$vid]) ? (string)$facetten['sw'][$vid] : '';
                 $docs[] = $doc;
             }
             $pageTimes[] = (int)round((microtime(true) - $t0) * 1000);
@@ -205,10 +206,16 @@ class IndexController extends Controller
                 $v[(string)$vid] = $liste;
             }
         }
+        $sw = [];
+        if (isset($data['sw']) && is_array($data['sw'])) {
+            foreach ($data['sw'] as $vid => $woerter) {
+                $sw[(string)$vid] = mb_substr((string)$woerter, 0, 200);
+            }
+        }
         /** @var StorageRepositoryContract $storage */
         $storage = pluginApp(StorageRepositoryContract::class);
-        $storage->uploadObject(self::PLUGIN, self::FACET_KEY, json_encode(['werte' => (object)$werte, 'v' => (object)$v], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        return ['ok' => true, 'werte' => count($werte), 'varianten' => count($v), 'gespeichert' => date('c')];
+        $storage->uploadObject(self::PLUGIN, self::FACET_KEY, json_encode(['werte' => (object)$werte, 'v' => (object)$v, 'sw' => (object)$sw], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        return ['ok' => true, 'werte' => count($werte), 'varianten' => count($v), 'stilwoerter' => count($sw), 'gespeichert' => date('c')];
     }
 
     private function tokenOk(Request $request, ConfigRepository $config): bool
@@ -325,6 +332,7 @@ class IndexController extends Controller
             'av'  => (int)($d['variation']['availabilityId'] ?? 0),
             'ok'  => !empty($d['filter']['isSalable']),
             'at'  => $merkmale,
+            'kw'  => mb_substr(trim((string)($d['texts']['keywords'] ?? '')), 0, 300),
         ];
     }
 

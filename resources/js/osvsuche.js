@@ -2160,9 +2160,9 @@
       });
     });
     st.ms = new MiniSearch({
-      idField: "id", fields: ["n", "v", "a", "nr", "h", "kat", "t"], storeFields: ["i", "h", "vk"],
+      idField: "id", fields: ["n", "v", "a", "nr", "h", "kat", "t", "fx", "kw", "sw"], storeFields: ["i", "h", "vk"],
       processTerm: processTerm, tokenize: tokenize,
-      extractField: function (d, f) { return f === "t" ? teile(d) : (d[f] == null ? "" : String(d[f])); },
+      extractField: function (d, f) { if (f === "t") return teile(d); if (f === "fx") return (d.fa || []).map(function (id) { var w = FW[id]; return w ? w[1] : ""; }).join(" "); return d[f] == null ? "" : String(d[f]); },
       searchOptions: { processTerm: queryTerm, tokenize: tokenize }
     });
     st.ms.addAll(docs);
@@ -2197,7 +2197,7 @@
     var opts = function (mode) {
       return {
         boostTerm: function (term) { return HERKUNFT[term] ? 0.15 : 1; },
-        boost: { n: 3, v: 1.2, a: 1, kat: 4, h: 1, nr: 4, t: 1.0 },
+        boost: { n: 3, v: 1.2, a: 1, kat: 4, h: 1, nr: 4, t: 1.0, fx: 0.8, kw: 0.5, sw: 0.5 },
         prefix: function (t) { return t.length >= 2 && !/^\d+$/.test(t); },
         fuzzy: fuzzy, combineWith: mode,
         boostDocument: function (id, term, sf) {
@@ -2560,5 +2560,5 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.7.2" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.8.0" };
 })();
