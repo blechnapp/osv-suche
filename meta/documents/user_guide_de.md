@@ -38,3 +38,12 @@ Seitenblättern ausgeblendet. Findet es nichts oder lädt der Index nicht, bleib
   Neue Versionen kommen dadurch ohne Neuspeichern der Container-Verknüpfung an.
   **Beim Versionswechsel `IndexController::VERSION` mit hochzählen.** Das CSS steckt im Skript.
 - Der Index enthält die Merkmale je Variante (`at`). Nach dem ersten Bereitstellen einmal neu aufbauen.
+
+## Ab 0.7.0: Filter aus den Facetten (Eigenschaften)
+- `POST /rest/osv-suche/facetten?token=…` speichert die Facetten-Zuordnung je Variante
+  (`{"werte":{"<FacettenwertId>":["Farbe","rot",Facettenposition,Wertposition]},"v":{"<VariantenId>":[Wert-IDs]}}`).
+  Erzeugt wird sie außerhalb über die Shop-Schnittstelle (je Facettenwert ein Abruf, ~7 Minuten), gedacht für einen nächtlichen Lauf.
+- Beim Neuaufbau bekommt jede Variante `fa` (Wert-IDs), der Index die Werteliste `_fw`.
+- Innerhalb einer Facette ODER, zwischen Facetten UND.
+- Neuer Container **OSV Suche Kopf** → `Ceres::Template.Style`: blendet Plentys Ergebnisliste von Anfang an aus
+  (kein Aufblitzen). Findet die Suche nichts, kommt Plentys Seite zurück.

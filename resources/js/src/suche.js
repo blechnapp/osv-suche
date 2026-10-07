@@ -21,7 +21,7 @@
     return t.replace(/(oegen|ogen)$/, "ogen").replace(/(chen|innen|ern|en|er|e|n|s)$/, "");
   }
   var STOP = {}; "mit und fuer der die das den dem des ein eine einer einem eines aus von vom zum zur im in am an auf ohne als oder ganz sehr cm mm m hoch gross grosse grosser kleine klein kleiner neu neue neuer nr stueck stk inh ek e.k gmbh kg eg co erzgeb original".split(" ").forEach(function (w) { STOP[w] = 1; });
-  var ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
+  var FW = {}, ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
 
   function processTerm(t) {
     var x = norm(t).replace(/[.,;:!?()]/g, "");
@@ -116,7 +116,7 @@
 
   // ---------- Index ----------
   function aufbauen(data) {
-    var cfg = data._cfg || {};
+    var cfg = data._cfg || {}; FW = data._fw || {};
     st.cfg = cfg; SYN = {}; HERKUNFT = {}; EIGEN = {}; ABW = [];
     var s = cfg.synonyme || {};
     Object.keys(s).forEach(function (a) { var k = norm(a), z = norm(s[a]); SYN[k] = z; SYN[stem(k)] = z; });
@@ -159,7 +159,7 @@
         var c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
         if (c && c.t && Date.now() - c.t < CACHE_MS && c.d && c.d.docs) { aufbauen(c.d); return ok(); }
       } catch (e) { /* kein Speicher, egal */ }
-      fetch(INDEX_URL, { credentials: "same-origin" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      (window.__osvsIndex || fetch(INDEX_URL, { credentials: "same-origin" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }))
         .then(function (d) {
           if (!d || !d.docs || !d.docs.length) throw new Error("leer");
           aufbauen(d);
@@ -401,13 +401,13 @@
         alle = suchen(k.terms.join(" "));
         if (alle.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
       } else if (!k) alle = suchen(q);
-      if (!alle.length) { el.style.display = "none"; return; } // Plentys Seite bleibt stehen
+      if (!alle.length) { el.style.display = "none"; document.body.classList.add("osvs-aus"); return; } // Plentys Seite bleibt stehen
       alle.forEach(function (x, i) { x.rang = i; x.preis = preisZahl(x.d.p); });
       // Passende Kategorien: Standardkategorie je Treffer, nach Anzahl, ohne Sammelkategorien
       var katZahl = {}, katName = {};
       alle.forEach(function (x) { var id = x.d.k; if (!id || KAT_AUSNAHMEN[id]) return; katZahl[id] = (katZahl[id] || 0) + 1; katName[id] = (x.d.kat || "").split(" » ").pop(); });
       var kats = Object.keys(katZahl).sort(function (a, b) { return katZahl[b] - katZahl[a]; }).slice(0, KAT_MAX);
-      var f = { kat: 0, her: {}, at: {}, von: "", bis: "", lief: false, sort: "rel" };
+      var f = { kat: 0, her: {}, fa: {}, von: "", bis: "", lief: false, sort: "rel" };
       var kopf = el.querySelector(".osvs-ergebnis-kopf"), liste = el.querySelector(".osvs-ergebnis-liste"), fuss = el.querySelector(".osvs-ergebnis-fuss");
       var treffer = [], n = 0;
       function basis() { return f.kat ? alle.filter(function (x) { return String(x.d.k) === String(f.kat); }) : alle; }
@@ -416,46 +416,65 @@
         return Object.keys(c).sort(function (a, b) { return c[b] - c[a] || a.localeCompare(b, "de", { numeric: true }); }).map(function (v) { return [v, c[v]]; });
       }
       function chip(gruppe, wert, anzahl, an) {
-        return '<label class="osvs-chip"><input type="checkbox" data-g="' + esc(gruppe) + '" value="' + esc(wert) + '"' + (an ? " checked" : "") + "> " + esc(wert) + " <small>(" + anzahl + ")</small></label>";
+        return '<label class="osvs-opt"><input type="checkbox" data-g="' + esc(gruppe) + '" value="' + esc(wert) + '"' + (an ? " checked" : "") + "><span>" + esc(wert) + "</span><small>" + anzahl + "</small></label>";
       }
+      function knopf(id, titel, aktiv, inhalt) {
+        return '<div class="osvs-dd' + (offen === id ? " osvs-dd-auf" : "") + '" data-dd="' + id + '"><button type="button" class="osvs-dd-knopf' + (aktiv ? " osvs-dd-aktiv" : "") + '">' + esc(titel) +
+          (aktiv ? ' <b class="osvs-dd-zahl">' + aktiv + "</b>" : "") + ' <span class="osvs-dd-pfeil">▾</span></button><div class="osvs-dd-panel">' + inhalt + "</div></div>";
+      }
+      var offen = "";
       function zeichneKopf() {
         var b = basis(), mitMerkmalen = f.kat || kats.length <= 1;
-        var html = '<div class="osvs-f-zeile"><p class="osvs-ergebnis-zahl"></p>' +
-          '<select class="custom-select osvs-sort"><option value="rel">Relevanz</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="az">Name A–Z</option></select></div>' +
-          (hinweis ? '<p class="osvs-hinweis">' + hinweis + "</p>" : "");
-        if (kats.length > 1) {
-          html += '<div class="osvs-kats"><span class="osvs-f-titel">Passende Kategorien</span>' +
-            '<button type="button" class="osvs-kat' + (!f.kat ? " osvs-kat-an" : "") + '" data-kat="0">Alle <small>' + alle.length + "</small></button>" +
-            kats.map(function (id) { return '<button type="button" class="osvs-kat' + (String(f.kat) === id ? " osvs-kat-an" : "") + '" data-kat="' + id + '">' + esc(katName[id]) + " <small>" + katZahl[id] + "</small></button>"; }).join("") + "</div>";
+        var html = '<div class="osvs-kopf-zeile"><p class="osvs-ergebnis-zahl"></p></div>' + (hinweis ? '<p class="osvs-hinweis">' + hinweis + "</p>" : "");
+        var sichtbareKats = kats.filter(function (id) { return katZahl[id] >= 2; });
+        if (sichtbareKats.length > 1) {
+          html += '<div class="osvs-kats">' +
+            '<button type="button" class="osvs-kat' + (!f.kat ? " osvs-kat-an" : "") + '" data-kat="0">Alle<small>' + alle.length + "</small></button>" +
+            sichtbareKats.map(function (id) { return '<button type="button" class="osvs-kat' + (String(f.kat) === id ? " osvs-kat-an" : "") + '" data-kat="' + id + '">' + esc(katName[id]) + "<small>" + katZahl[id] + "</small></button>"; }).join("") + "</div>";
         }
-        var hers = zaehlen(b, function (x) { return [x.d.h]; });
-        html += '<details class="osvs-filter"' + (window.innerWidth >= 768 ? " open" : "") + "><summary>Filter</summary>";
-        // Merkmale (Groesse, Farbe …) nur in einer Kategorie, wie in der PWA
+        var leiste = "";
         if (mitMerkmalen) {
-          var namen = zaehlen(b, function (x) { return (x.d.at || []).map(function (p) { return p[0]; }); });
-          namen.forEach(function (nm) {
-            var werte = zaehlen(b, function (x) { return (x.d.at || []).filter(function (p) { return p[0] === nm[0]; }).map(function (p) { return p[1]; }); });
+          // Facetten aus den Plenty-Eigenschaften (fa = Facettenwert-IDs je Variante), Reihenfolge wie im Shop
+          var gruppen = {};
+          b.forEach(function (x) { (x.d.fa || []).forEach(function (id) { var w = FW[id]; if (!w) return; var g = gruppen[w[0]] = gruppen[w[0]] || { pos: w[2], werte: {} }; var e = g.werte[id] = g.werte[id] || { name: w[1], pos: w[3], n: 0 }; e.n++; }); });
+          Object.keys(gruppen).sort(function (a, c) { return gruppen[a].pos - gruppen[c].pos || a.localeCompare(c, "de"); }).forEach(function (fn) {
+            var werte = Object.keys(gruppen[fn].werte).map(function (id) { var e = gruppen[fn].werte[id]; return [id, e.name, e.n, e.pos]; });
             if (werte.length < 2) return;
-            html += '<div class="osvs-f-gruppe"><span class="osvs-f-titel">' + esc(nm[0]) + "</span>" + werte.slice(0, 16).map(function (w) { return chip("at:" + nm[0], w[0], w[1], f.at[nm[0] + "\u0001" + w[0]]); }).join("") + "</div>";
+            werte.sort(function (a, c) { return a[3] - c[3] || a[1].localeCompare(c[1], "de", { numeric: true }); });
+            var aktiv = werte.filter(function (w) { return f.fa[w[0]]; }).length;
+            leiste += knopf("fa:" + fn, fn, aktiv, werte.map(function (w) {
+              return '<label class="osvs-opt"><input type="checkbox" data-g="fa" data-gruppe="' + esc(fn) + '" value="' + esc(w[0]) + '"' + (f.fa[w[0]] ? " checked" : "") + "><span>" + esc(w[1]) + "</span><small>" + w[2] + "</small></label>";
+            }).join(""));
           });
         }
-        if (hers.length > 1) html += '<div class="osvs-f-gruppe"><span class="osvs-f-titel">Hersteller</span>' + hers.slice(0, 12).map(function (w) { return chip("her", w[0], w[1], f.her[w[0]]); }).join("") + "</div>";
-        html += '<div class="osvs-f-gruppe"><span class="osvs-f-titel">Preis</span><input type="number" min="0" class="form-control osvs-von" placeholder="von €" value="' + esc(f.von) + '"> – <input type="number" min="0" class="form-control osvs-bis" placeholder="bis €" value="' + esc(f.bis) + '"></div>' +
-          '<div class="osvs-f-gruppe"><label class="osvs-chip"><input type="checkbox" class="osvs-lief"' + (f.lief ? " checked" : "") + "> Nur sofort lieferbar</label></div>" +
-          (!mitMerkmalen ? '<p class="osvs-f-tipp">Weitere Filter wie Größe oder Farbe erscheinen, wenn oben eine Kategorie gewählt ist.</p>' : "") +
-          '<button type="button" class="btn btn-link osvs-reset">Filter zurücksetzen</button></details>';
+        var hers = zaehlen(b, function (x) { return [x.d.h]; });
+        if (hers.length > 1) leiste += knopf("her", "Hersteller", Object.keys(f.her).length, hers.map(function (w) { return chip("her", w[0], w[1], f.her[w[0]]); }).join(""));
+        leiste += knopf("preis", "Preis", (f.von || f.bis) ? 1 : 0,
+          '<div class="osvs-preis"><input type="number" min="0" inputmode="decimal" class="form-control osvs-von" placeholder="von €" value="' + esc(f.von) + '"><span>–</span><input type="number" min="0" inputmode="decimal" class="form-control osvs-bis" placeholder="bis €" value="' + esc(f.bis) + '"></div>');
+        leiste += '<label class="osvs-schalter"><input type="checkbox" class="osvs-lief"' + (f.lief ? " checked" : "") + "><span>Nur sofort lieferbar</span></label>";
+        leiste += '<div class="osvs-sortierung"><label for="osvs-sort">Sortieren:</label><select id="osvs-sort" class="osvs-sort"><option value="rel">Relevanz</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="az">Name A–Z</option></select></div>';
+        html += '<div class="osvs-leiste">' + leiste + "</div>";
+        // aktive Filter als entfernbare Marken
+        var marken = [];
+        Object.keys(f.fa).forEach(function (id) { var w = FW[id]; if (w) marken.push('<button type="button" class="osvs-marke" data-weg="fa" data-wert="' + esc(id) + '">' + esc(w[1]) + " ×</button>"); });
+        Object.keys(f.her).forEach(function (h) { marken.push('<button type="button" class="osvs-marke" data-weg="her" data-wert="' + esc(h) + '">' + esc(h) + " ×</button>"); });
+        if (f.von || f.bis) marken.push('<button type="button" class="osvs-marke" data-weg="preis">' + (f.von ? "ab " + esc(f.von) + " € " : "") + (f.bis ? "bis " + esc(f.bis) + " €" : "") + " ×</button>");
+        if (f.lief) marken.push('<button type="button" class="osvs-marke" data-weg="lief">Sofort lieferbar ×</button>');
+        if (marken.length) html += '<div class="osvs-marken">' + marken.join("") + '<button type="button" class="osvs-reset">Alle Filter entfernen</button></div>';
+        else if (!mitMerkmalen && sichtbareKats.length > 1) html += '<p class="osvs-f-tipp">Tipp: Wählen Sie oben eine Kategorie, um nach Größe, Farbe, Modell oder Motiv zu filtern.</p>';
         kopf.innerHTML = html;
         kopf.querySelector(".osvs-sort").value = f.sort;
       }
       function anwenden() {
-        var he = Object.keys(f.her), atKeys = Object.keys(f.at), von = parseFloat(f.von), bis = parseFloat(f.bis);
-        var atGruppen = {}; atKeys.forEach(function (key) { var t = key.split("\u0001"); (atGruppen[t[0]] = atGruppen[t[0]] || {})[t[1]] = 1; });
+        var he = Object.keys(f.her), von = parseFloat(f.von), bis = parseFloat(f.bis);
+        // innerhalb einer Facette ODER, zwischen Facetten UND (wie Plenty)
+        var faGruppen = {}; Object.keys(f.fa).forEach(function (id) { var w = FW[id]; if (w) (faGruppen[w[0]] = faGruppen[w[0]] || {})[id] = 1; });
         treffer = basis().filter(function (x) {
           if (he.length && !f.her[x.d.h]) return false;
           if (!isNaN(von) && x.preis < von) return false;
           if (!isNaN(bis) && x.preis > bis) return false;
           if (f.lief && !x.d.ok) return false;
-          for (var nm in atGruppen) { if (!(x.d.at || []).some(function (p) { return p[0] === nm && atGruppen[nm][p[1]]; })) return false; }
+          for (var g in faGruppen) { if (!(x.d.fa || []).some(function (id) { return faGruppen[g][id]; })) return false; }
           return true;
         });
         var cmp = { rel: function (a, b) { return a.rang - b.rang; }, pa: function (a, b) { return a.preis - b.preis; }, pd: function (a, b) { return b.preis - a.preis; }, az: function (a, b) { return a.d.n.localeCompare(b.d.n, "de"); } }[f.sort];
@@ -470,29 +489,41 @@
         fuss.innerHTML = n < treffer.length ? '<button type="button" class="btn btn-primary osvs-weiter">Weitere Artikel anzeigen (' + (treffer.length - n) + ")</button>" :
           (!treffer.length ? '<p>Keine Artikel mit diesen Filtern. <button type="button" class="btn btn-link osvs-reset">Filter zurücksetzen</button></p>' : "");
       }
-      function zuruecksetzen(alles) { f.her = {}; f.at = {}; f.von = ""; f.bis = ""; f.lief = false; if (alles) f.kat = 0; }
+      function zuruecksetzen(alles) { f.her = {}; f.fa = {}; f.von = ""; f.bis = ""; f.lief = false; if (alles) f.kat = 0; }
       kopf.addEventListener("change", function (ev) {
         var t = ev.target, g = t.dataset && t.dataset.g;
         if (g === "her") { if (t.checked) f.her[t.value] = 1; else delete f.her[t.value]; }
-        else if (g && g.indexOf("at:") === 0) { var key = g.slice(3) + "\u0001" + t.value; if (t.checked) f.at[key] = 1; else delete f.at[key]; }
+        else if (g === "fa") { if (t.checked) f.fa[t.value] = 1; else delete f.fa[t.value]; }
         else if (t.classList.contains("osvs-sort")) f.sort = t.value;
         else if (t.classList.contains("osvs-von")) f.von = t.value;
         else if (t.classList.contains("osvs-bis")) f.bis = t.value;
         else if (t.classList.contains("osvs-lief")) f.lief = t.checked;
-        anwenden();
+        zeichneKopf(); anwenden();
       });
       el.addEventListener("click", function (ev) {
         var kb = ev.target.closest(".osvs-kat");
-        if (kb) { f.kat = Number(kb.dataset.kat) || 0; zuruecksetzen(false); f.her = {}; zeichneKopf(); anwenden(); return; }
-        if (ev.target.closest(".osvs-reset")) { zuruecksetzen(false); zeichneKopf(); anwenden(); return; }
-        if (ev.target.closest(".osvs-weiter")) mehr();
+        if (kb) { f.kat = Number(kb.dataset.kat) || 0; zuruecksetzen(false); offen = ""; zeichneKopf(); anwenden(); return; }
+        var dk = ev.target.closest(".osvs-dd-knopf");
+        if (dk) { var id = dk.parentNode.dataset.dd; offen = offen === id ? "" : id; [].forEach.call(kopf.querySelectorAll(".osvs-dd"), function (d) { d.classList.toggle("osvs-dd-auf", d.dataset.dd === offen); }); return; }
+        var mk = ev.target.closest(".osvs-marke");
+        if (mk) {
+          var w = mk.dataset.weg;
+          if (w === "fa") delete f.fa[mk.dataset.wert]; else if (w === "her") delete f.her[mk.dataset.wert];
+          else if (w === "preis") { f.von = ""; f.bis = ""; } else if (w === "lief") f.lief = false;
+          zeichneKopf(); anwenden(); return;
+        }
+        if (ev.target.closest(".osvs-reset")) { zuruecksetzen(false); offen = ""; zeichneKopf(); anwenden(); return; }
+        if (ev.target.closest(".osvs-weiter")) { mehr(); return; }
+      });
+      document.addEventListener("click", function (ev) {
+        if (offen && !ev.target.closest(".osvs-dd")) { offen = ""; [].forEach.call(kopf.querySelectorAll(".osvs-dd"), function (d) { d.classList.remove("osvs-dd-auf"); }); }
       });
       document.body.classList.add("osvs-ergebnis-aktiv");
       schliessen();
       zeichneKopf(); anwenden();
-    }).catch(function () { el.style.display = "none"; });
+    }).catch(function () { el.style.display = "none"; document.body.classList.add("osvs-aus"); });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.6.0" };
+  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.7.0" };
 })();

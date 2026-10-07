@@ -2020,7 +2020,7 @@
 (function () {
   "use strict";
   if (window.OSVSuche) return;
-  (function () { var st = document.createElement("style"); st.id = "osvs-css"; st.textContent = "/* Ceres-Vorschlaege ausblenden, sobald unsere Suche bereit ist; nur bei 'nichts gefunden' (osvs-ceres) zeigen */body.osvs-bereit:not(.osvs-ceres) .autocomplete-suggestions{display:none!important}.osvs-panel{display:none;position:absolute;top:100%;left:0;right:0;z-index:1100;background:#fff;border:1px solid #e3e0d9;border-radius:0 0 6px 6px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:75vh;overflow-y:auto;text-align:left}.osvs-hinweis{padding:8px 12px;font-size:13px;background:#fffbeb;color:#7c4a03;border-bottom:1px solid #f0e6c8}.osvs-hit{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0ede6;color:#1d2433;text-decoration:none}.osvs-hit:hover,.osvs-hit.osvs-sel{background:#f7f5f0;text-decoration:none;color:#1d2433}.osvs-hit img{width:48px;height:48px;object-fit:contain;flex:0 0 48px;background:#fff}.osvs-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.3}.osvs-n{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis}.osvs-v{font-size:12px;color:#6b7280}.osvs-p{flex:0 0 auto;font-weight:600;font-size:14px;white-space:nowrap}.osvs-uvp{color:#9ca3af;font-weight:400;margin-right:4px}.osvs-panel mark{background:#fde68a;padding:0;color:inherit}.osvs-mehr{background:#f7f5f0}.osvs-alle{display:block;padding:10px 12px;font-size:14px;color:#1f3a5f;font-weight:600}@media (max-width:767px){.osvs-panel{border-radius:6px;max-height:65vh}.osvs-hit img{width:44px;height:44px;flex-basis:44px}.osvs-n{font-size:14px;white-space:normal}.osvs-txt{word-break:normal;hyphens:auto}}/* Ergebnisseite: Plentys Raster, Toolbar, Filter und Seitenblaettern ausblenden, solange unser Widget Treffer zeigt */body.osvs-ergebnis-aktiv .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),body.osvs-ergebnis-aktiv .widget-pagination,body.osvs-ergebnis-aktiv .widget-toolbar,body.osvs-ergebnis-aktiv .widget-selected-filter,body.osvs-ergebnis-aktiv .widget-filter-base,body.osvs-ergebnis-aktiv .widget-items-per-page,body.osvs-ergebnis-aktiv .widget-item-sorting{display:none!important}.osvs-ergebnis-zahl{font-weight:600;margin:0 0 8px}.osvs-ergebnis .osvs-hinweis{display:inline-block;border-radius:4px;margin:0 0 12px}.osvs-ergebnis-fuss{margin:16px 0 24px}.osvs-f-zeile{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}.osvs-f-zeile .osvs-ergebnis-zahl{margin:0}.osvs-sort{width:auto;min-width:200px}.osvs-filter{background:#f2f2f2;padding:10px 14px;margin:0 0 16px;border-radius:4px}.osvs-filter summary{font-weight:600;cursor:pointer}.osvs-f-gruppe{margin:10px 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px}.osvs-f-titel{font-weight:600;min-width:90px}.osvs-kats{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}.osvs-kat{border:1px solid #ccc;background:#fff;border-radius:4px;padding:6px 12px;font-size:14px;cursor:pointer}.osvs-kat small{color:#6b7280;margin-left:4px}.osvs-kat-an{background:#0b2a5b;color:#fff;border-color:#0b2a5b}.osvs-kat-an small{color:#dbe3f0}.osvs-f-tipp{font-size:13px;color:#6b7280;margin:6px 0 0}.osvs-chip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #ddd;border-radius:16px;padding:3px 10px;margin:0;font-size:13px;cursor:pointer}.osvs-chip small{color:#6b7280}.osvs-von,.osvs-bis{width:110px;display:inline-block}.osvs-ansehen{display:block;width:100%;margin:8px 0}"; document.head.appendChild(st); })();
+  (function () { var st = document.createElement("style"); st.id = "osvs-css"; st.textContent = "/* Ceres-Vorschlaege ausblenden, sobald unsere Suche bereit ist; nur bei 'nichts gefunden' (osvs-ceres) zeigen */body.osvs-bereit:not(.osvs-ceres) .autocomplete-suggestions{display:none!important}.osvs-panel{display:none;position:absolute;top:100%;left:0;right:0;z-index:1100;background:#fff;border:1px solid #e3e0d9;border-radius:0 0 6px 6px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:75vh;overflow-y:auto;text-align:left}.osvs-hinweis{padding:8px 12px;font-size:13px;background:#fffbeb;color:#7c4a03;border-bottom:1px solid #f0e6c8}.osvs-hit{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0ede6;color:#1d2433;text-decoration:none}.osvs-hit:hover,.osvs-hit.osvs-sel{background:#f7f5f0;text-decoration:none;color:#1d2433}.osvs-hit img{width:48px;height:48px;object-fit:contain;flex:0 0 48px;background:#fff}.osvs-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.3}.osvs-n{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis}.osvs-v{font-size:12px;color:#6b7280}.osvs-p{flex:0 0 auto;font-weight:600;font-size:14px;white-space:nowrap}.osvs-uvp{color:#9ca3af;font-weight:400;margin-right:4px}.osvs-panel mark{background:#fde68a;padding:0;color:inherit}.osvs-mehr{background:#f7f5f0}.osvs-alle{display:block;padding:10px 12px;font-size:14px;color:#1f3a5f;font-weight:600}@media (max-width:767px){.osvs-panel{border-radius:6px;max-height:65vh}.osvs-hit img{width:44px;height:44px;flex-basis:44px}.osvs-n{font-size:14px;white-space:normal}.osvs-txt{word-break:normal;hyphens:auto}}/* Ergebnisseite: Plentys Raster, Toolbar, Filter und Seitenblaettern ausblenden, solange unser Widget Treffer zeigt */body.osvs-ergebnis-aktiv .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),body.osvs-ergebnis-aktiv .widget-pagination,body.osvs-ergebnis-aktiv .widget-toolbar,body.osvs-ergebnis-aktiv .widget-selected-filter,body.osvs-ergebnis-aktiv .widget-filter-base,body.osvs-ergebnis-aktiv .widget-items-per-page,body.osvs-ergebnis-aktiv .widget-item-sorting{display:none!important}.osvs-ergebnis-zahl{font-weight:600;margin:0 0 8px}.osvs-ergebnis .osvs-hinweis{display:inline-block;border-radius:4px;margin:0 0 12px}.osvs-ergebnis-fuss{margin:16px 0 24px}.osvs-kopf-zeile .osvs-ergebnis-zahl{font-size:15px;color:#555;margin:0 0 10px}.osvs-kats{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;margin:0 0 4px;scrollbar-width:thin}.osvs-kat{flex:0 0 auto;border:1px solid #c9ced6;background:#fff;color:#04305e;border-radius:20px;padding:7px 16px;font-size:14px;cursor:pointer;white-space:nowrap;transition:background .15s}.osvs-kat:hover{border-color:#04305e}.osvs-kat small{margin-left:6px;color:#7a8594;font-size:12px}.osvs-kat-an{background:#04305e;color:#fff;border-color:#04305e}.osvs-kat-an small{color:#c8d3e6}.osvs-leiste{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #e3e6ea;border-bottom:1px solid #e3e6ea;margin-bottom:12px}.osvs-dd{position:relative}.osvs-dd-knopf{border:1px solid #c9ced6;background:#fff;color:#212529;border-radius:4px;padding:7px 12px;font-size:14px;cursor:pointer;white-space:nowrap}.osvs-dd-knopf:hover,.osvs-dd-auf .osvs-dd-knopf{border-color:#04305e}.osvs-dd-aktiv{border-color:#04305e;color:#04305e;font-weight:600}.osvs-dd-zahl{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#04305e;color:#fff;font-size:11px;text-align:center;margin-left:4px}.osvs-dd-pfeil{font-size:11px;margin-left:4px;color:#7a8594}.osvs-dd-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:50;background:#fff;border:1px solid #d5dae1;border-radius:6px;box-shadow:0 10px 28px rgba(0,0,0,.14);padding:8px;min-width:240px;max-width:340px;max-height:320px;overflow-y:auto}.osvs-dd-auf .osvs-dd-panel{display:block}.osvs-opt{display:flex;align-items:center;gap:8px;margin:0;padding:6px 8px;border-radius:4px;font-size:14px;cursor:pointer}.osvs-opt:hover{background:#f3f5f8}.osvs-opt span{flex:1}.osvs-opt small{color:#7a8594}.osvs-preis{display:flex;align-items:center;gap:8px;padding:4px}.osvs-preis input{width:100px}.osvs-schalter{display:inline-flex;align-items:center;gap:8px;margin:0;font-size:14px;cursor:pointer}.osvs-sortierung{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:14px}.osvs-sortierung label{margin:0;color:#555}.osvs-sort{border:1px solid #c9ced6;border-radius:4px;padding:6px 8px;font-size:14px;background:#fff}.osvs-marken{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}.osvs-marke{border:0;background:#e8eef6;color:#04305e;border-radius:16px;padding:5px 12px;font-size:13px;cursor:pointer}.osvs-reset{border:0;background:none;color:#04305e;text-decoration:underline;font-size:13px;cursor:pointer;padding:5px 4px}.osvs-f-tipp{font-size:13px;color:#7a8594;margin:-4px 0 14px}.osvs-ansehen{display:block;width:100%;margin:8px 0}@media (max-width:767px){.osvs-kats{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.osvs-leiste{gap:8px}.osvs-dd-knopf{padding:6px 10px;font-size:13px}.osvs-schalter{font-size:13px}.osvs-sortierung{margin-left:0;width:100%}.osvs-sortierung label{display:inline}.osvs-sort{flex:1}.osvs-dd{position:static}.osvs-leiste{position:relative}.osvs-dd-panel{left:0;right:0;max-width:none;min-width:0}}"; document.head.appendChild(st); })();
   var INDEX_URL = "/rest/osv-suche/index", PREIS_URL = "/rest/osv-suche/preise", SUCH_URL = "/artikelsuchergebnisse/?query=";
   var CACHE_KEY = "osvsuche_index_v1", CACHE_MS = 60 * 60 * 1000, MAX = 8;
   var st = { laden: null, ms: null, docs: null, byId: null, cfg: null, panel: null, input: null, sel: -1, items: [], q: "" };
@@ -2036,7 +2036,7 @@
     return t.replace(/(oegen|ogen)$/, "ogen").replace(/(chen|innen|ern|en|er|e|n|s)$/, "");
   }
   var STOP = {}; "mit und fuer der die das den dem des ein eine einer einem eines aus von vom zum zur im in am an auf ohne als oder ganz sehr cm mm m hoch gross grosse grosser kleine klein kleiner neu neue neuer nr stueck stk inh ek e.k gmbh kg eg co erzgeb original".split(" ").forEach(function (w) { STOP[w] = 1; });
-  var ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
+  var FW = {}, ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
 
   function processTerm(t) {
     var x = norm(t).replace(/[.,;:!?()]/g, "");
@@ -2131,7 +2131,7 @@
 
   // ---------- Index ----------
   function aufbauen(data) {
-    var cfg = data._cfg || {};
+    var cfg = data._cfg || {}; FW = data._fw || {};
     st.cfg = cfg; SYN = {}; HERKUNFT = {}; EIGEN = {}; ABW = [];
     var s = cfg.synonyme || {};
     Object.keys(s).forEach(function (a) { var k = norm(a), z = norm(s[a]); SYN[k] = z; SYN[stem(k)] = z; });
@@ -2174,7 +2174,7 @@
         var c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
         if (c && c.t && Date.now() - c.t < CACHE_MS && c.d && c.d.docs) { aufbauen(c.d); return ok(); }
       } catch (e) { /* kein Speicher, egal */ }
-      fetch(INDEX_URL, { credentials: "same-origin" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      (window.__osvsIndex || fetch(INDEX_URL, { credentials: "same-origin" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }))
         .then(function (d) {
           if (!d || !d.docs || !d.docs.length) throw new Error("leer");
           aufbauen(d);
@@ -2416,13 +2416,13 @@
         alle = suchen(k.terms.join(" "));
         if (alle.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
       } else if (!k) alle = suchen(q);
-      if (!alle.length) { el.style.display = "none"; return; } // Plentys Seite bleibt stehen
+      if (!alle.length) { el.style.display = "none"; document.body.classList.add("osvs-aus"); return; } // Plentys Seite bleibt stehen
       alle.forEach(function (x, i) { x.rang = i; x.preis = preisZahl(x.d.p); });
       // Passende Kategorien: Standardkategorie je Treffer, nach Anzahl, ohne Sammelkategorien
       var katZahl = {}, katName = {};
       alle.forEach(function (x) { var id = x.d.k; if (!id || KAT_AUSNAHMEN[id]) return; katZahl[id] = (katZahl[id] || 0) + 1; katName[id] = (x.d.kat || "").split(" » ").pop(); });
       var kats = Object.keys(katZahl).sort(function (a, b) { return katZahl[b] - katZahl[a]; }).slice(0, KAT_MAX);
-      var f = { kat: 0, her: {}, at: {}, von: "", bis: "", lief: false, sort: "rel" };
+      var f = { kat: 0, her: {}, fa: {}, von: "", bis: "", lief: false, sort: "rel" };
       var kopf = el.querySelector(".osvs-ergebnis-kopf"), liste = el.querySelector(".osvs-ergebnis-liste"), fuss = el.querySelector(".osvs-ergebnis-fuss");
       var treffer = [], n = 0;
       function basis() { return f.kat ? alle.filter(function (x) { return String(x.d.k) === String(f.kat); }) : alle; }
@@ -2431,46 +2431,65 @@
         return Object.keys(c).sort(function (a, b) { return c[b] - c[a] || a.localeCompare(b, "de", { numeric: true }); }).map(function (v) { return [v, c[v]]; });
       }
       function chip(gruppe, wert, anzahl, an) {
-        return '<label class="osvs-chip"><input type="checkbox" data-g="' + esc(gruppe) + '" value="' + esc(wert) + '"' + (an ? " checked" : "") + "> " + esc(wert) + " <small>(" + anzahl + ")</small></label>";
+        return '<label class="osvs-opt"><input type="checkbox" data-g="' + esc(gruppe) + '" value="' + esc(wert) + '"' + (an ? " checked" : "") + "><span>" + esc(wert) + "</span><small>" + anzahl + "</small></label>";
       }
+      function knopf(id, titel, aktiv, inhalt) {
+        return '<div class="osvs-dd' + (offen === id ? " osvs-dd-auf" : "") + '" data-dd="' + id + '"><button type="button" class="osvs-dd-knopf' + (aktiv ? " osvs-dd-aktiv" : "") + '">' + esc(titel) +
+          (aktiv ? ' <b class="osvs-dd-zahl">' + aktiv + "</b>" : "") + ' <span class="osvs-dd-pfeil">▾</span></button><div class="osvs-dd-panel">' + inhalt + "</div></div>";
+      }
+      var offen = "";
       function zeichneKopf() {
         var b = basis(), mitMerkmalen = f.kat || kats.length <= 1;
-        var html = '<div class="osvs-f-zeile"><p class="osvs-ergebnis-zahl"></p>' +
-          '<select class="custom-select osvs-sort"><option value="rel">Relevanz</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="az">Name A–Z</option></select></div>' +
-          (hinweis ? '<p class="osvs-hinweis">' + hinweis + "</p>" : "");
-        if (kats.length > 1) {
-          html += '<div class="osvs-kats"><span class="osvs-f-titel">Passende Kategorien</span>' +
-            '<button type="button" class="osvs-kat' + (!f.kat ? " osvs-kat-an" : "") + '" data-kat="0">Alle <small>' + alle.length + "</small></button>" +
-            kats.map(function (id) { return '<button type="button" class="osvs-kat' + (String(f.kat) === id ? " osvs-kat-an" : "") + '" data-kat="' + id + '">' + esc(katName[id]) + " <small>" + katZahl[id] + "</small></button>"; }).join("") + "</div>";
+        var html = '<div class="osvs-kopf-zeile"><p class="osvs-ergebnis-zahl"></p></div>' + (hinweis ? '<p class="osvs-hinweis">' + hinweis + "</p>" : "");
+        var sichtbareKats = kats.filter(function (id) { return katZahl[id] >= 2; });
+        if (sichtbareKats.length > 1) {
+          html += '<div class="osvs-kats">' +
+            '<button type="button" class="osvs-kat' + (!f.kat ? " osvs-kat-an" : "") + '" data-kat="0">Alle<small>' + alle.length + "</small></button>" +
+            sichtbareKats.map(function (id) { return '<button type="button" class="osvs-kat' + (String(f.kat) === id ? " osvs-kat-an" : "") + '" data-kat="' + id + '">' + esc(katName[id]) + "<small>" + katZahl[id] + "</small></button>"; }).join("") + "</div>";
         }
-        var hers = zaehlen(b, function (x) { return [x.d.h]; });
-        html += '<details class="osvs-filter"' + (window.innerWidth >= 768 ? " open" : "") + "><summary>Filter</summary>";
-        // Merkmale (Groesse, Farbe …) nur in einer Kategorie, wie in der PWA
+        var leiste = "";
         if (mitMerkmalen) {
-          var namen = zaehlen(b, function (x) { return (x.d.at || []).map(function (p) { return p[0]; }); });
-          namen.forEach(function (nm) {
-            var werte = zaehlen(b, function (x) { return (x.d.at || []).filter(function (p) { return p[0] === nm[0]; }).map(function (p) { return p[1]; }); });
+          // Facetten aus den Plenty-Eigenschaften (fa = Facettenwert-IDs je Variante), Reihenfolge wie im Shop
+          var gruppen = {};
+          b.forEach(function (x) { (x.d.fa || []).forEach(function (id) { var w = FW[id]; if (!w) return; var g = gruppen[w[0]] = gruppen[w[0]] || { pos: w[2], werte: {} }; var e = g.werte[id] = g.werte[id] || { name: w[1], pos: w[3], n: 0 }; e.n++; }); });
+          Object.keys(gruppen).sort(function (a, c) { return gruppen[a].pos - gruppen[c].pos || a.localeCompare(c, "de"); }).forEach(function (fn) {
+            var werte = Object.keys(gruppen[fn].werte).map(function (id) { var e = gruppen[fn].werte[id]; return [id, e.name, e.n, e.pos]; });
             if (werte.length < 2) return;
-            html += '<div class="osvs-f-gruppe"><span class="osvs-f-titel">' + esc(nm[0]) + "</span>" + werte.slice(0, 16).map(function (w) { return chip("at:" + nm[0], w[0], w[1], f.at[nm[0] + "\u0001" + w[0]]); }).join("") + "</div>";
+            werte.sort(function (a, c) { return a[3] - c[3] || a[1].localeCompare(c[1], "de", { numeric: true }); });
+            var aktiv = werte.filter(function (w) { return f.fa[w[0]]; }).length;
+            leiste += knopf("fa:" + fn, fn, aktiv, werte.map(function (w) {
+              return '<label class="osvs-opt"><input type="checkbox" data-g="fa" data-gruppe="' + esc(fn) + '" value="' + esc(w[0]) + '"' + (f.fa[w[0]] ? " checked" : "") + "><span>" + esc(w[1]) + "</span><small>" + w[2] + "</small></label>";
+            }).join(""));
           });
         }
-        if (hers.length > 1) html += '<div class="osvs-f-gruppe"><span class="osvs-f-titel">Hersteller</span>' + hers.slice(0, 12).map(function (w) { return chip("her", w[0], w[1], f.her[w[0]]); }).join("") + "</div>";
-        html += '<div class="osvs-f-gruppe"><span class="osvs-f-titel">Preis</span><input type="number" min="0" class="form-control osvs-von" placeholder="von €" value="' + esc(f.von) + '"> – <input type="number" min="0" class="form-control osvs-bis" placeholder="bis €" value="' + esc(f.bis) + '"></div>' +
-          '<div class="osvs-f-gruppe"><label class="osvs-chip"><input type="checkbox" class="osvs-lief"' + (f.lief ? " checked" : "") + "> Nur sofort lieferbar</label></div>" +
-          (!mitMerkmalen ? '<p class="osvs-f-tipp">Weitere Filter wie Größe oder Farbe erscheinen, wenn oben eine Kategorie gewählt ist.</p>' : "") +
-          '<button type="button" class="btn btn-link osvs-reset">Filter zurücksetzen</button></details>';
+        var hers = zaehlen(b, function (x) { return [x.d.h]; });
+        if (hers.length > 1) leiste += knopf("her", "Hersteller", Object.keys(f.her).length, hers.map(function (w) { return chip("her", w[0], w[1], f.her[w[0]]); }).join(""));
+        leiste += knopf("preis", "Preis", (f.von || f.bis) ? 1 : 0,
+          '<div class="osvs-preis"><input type="number" min="0" inputmode="decimal" class="form-control osvs-von" placeholder="von €" value="' + esc(f.von) + '"><span>–</span><input type="number" min="0" inputmode="decimal" class="form-control osvs-bis" placeholder="bis €" value="' + esc(f.bis) + '"></div>');
+        leiste += '<label class="osvs-schalter"><input type="checkbox" class="osvs-lief"' + (f.lief ? " checked" : "") + "><span>Nur sofort lieferbar</span></label>";
+        leiste += '<div class="osvs-sortierung"><label for="osvs-sort">Sortieren:</label><select id="osvs-sort" class="osvs-sort"><option value="rel">Relevanz</option><option value="pa">Preis aufsteigend</option><option value="pd">Preis absteigend</option><option value="az">Name A–Z</option></select></div>';
+        html += '<div class="osvs-leiste">' + leiste + "</div>";
+        // aktive Filter als entfernbare Marken
+        var marken = [];
+        Object.keys(f.fa).forEach(function (id) { var w = FW[id]; if (w) marken.push('<button type="button" class="osvs-marke" data-weg="fa" data-wert="' + esc(id) + '">' + esc(w[1]) + " ×</button>"); });
+        Object.keys(f.her).forEach(function (h) { marken.push('<button type="button" class="osvs-marke" data-weg="her" data-wert="' + esc(h) + '">' + esc(h) + " ×</button>"); });
+        if (f.von || f.bis) marken.push('<button type="button" class="osvs-marke" data-weg="preis">' + (f.von ? "ab " + esc(f.von) + " € " : "") + (f.bis ? "bis " + esc(f.bis) + " €" : "") + " ×</button>");
+        if (f.lief) marken.push('<button type="button" class="osvs-marke" data-weg="lief">Sofort lieferbar ×</button>');
+        if (marken.length) html += '<div class="osvs-marken">' + marken.join("") + '<button type="button" class="osvs-reset">Alle Filter entfernen</button></div>';
+        else if (!mitMerkmalen && sichtbareKats.length > 1) html += '<p class="osvs-f-tipp">Tipp: Wählen Sie oben eine Kategorie, um nach Größe, Farbe, Modell oder Motiv zu filtern.</p>';
         kopf.innerHTML = html;
         kopf.querySelector(".osvs-sort").value = f.sort;
       }
       function anwenden() {
-        var he = Object.keys(f.her), atKeys = Object.keys(f.at), von = parseFloat(f.von), bis = parseFloat(f.bis);
-        var atGruppen = {}; atKeys.forEach(function (key) { var t = key.split("\u0001"); (atGruppen[t[0]] = atGruppen[t[0]] || {})[t[1]] = 1; });
+        var he = Object.keys(f.her), von = parseFloat(f.von), bis = parseFloat(f.bis);
+        // innerhalb einer Facette ODER, zwischen Facetten UND (wie Plenty)
+        var faGruppen = {}; Object.keys(f.fa).forEach(function (id) { var w = FW[id]; if (w) (faGruppen[w[0]] = faGruppen[w[0]] || {})[id] = 1; });
         treffer = basis().filter(function (x) {
           if (he.length && !f.her[x.d.h]) return false;
           if (!isNaN(von) && x.preis < von) return false;
           if (!isNaN(bis) && x.preis > bis) return false;
           if (f.lief && !x.d.ok) return false;
-          for (var nm in atGruppen) { if (!(x.d.at || []).some(function (p) { return p[0] === nm && atGruppen[nm][p[1]]; })) return false; }
+          for (var g in faGruppen) { if (!(x.d.fa || []).some(function (id) { return faGruppen[g][id]; })) return false; }
           return true;
         });
         var cmp = { rel: function (a, b) { return a.rang - b.rang; }, pa: function (a, b) { return a.preis - b.preis; }, pd: function (a, b) { return b.preis - a.preis; }, az: function (a, b) { return a.d.n.localeCompare(b.d.n, "de"); } }[f.sort];
@@ -2485,29 +2504,41 @@
         fuss.innerHTML = n < treffer.length ? '<button type="button" class="btn btn-primary osvs-weiter">Weitere Artikel anzeigen (' + (treffer.length - n) + ")</button>" :
           (!treffer.length ? '<p>Keine Artikel mit diesen Filtern. <button type="button" class="btn btn-link osvs-reset">Filter zurücksetzen</button></p>' : "");
       }
-      function zuruecksetzen(alles) { f.her = {}; f.at = {}; f.von = ""; f.bis = ""; f.lief = false; if (alles) f.kat = 0; }
+      function zuruecksetzen(alles) { f.her = {}; f.fa = {}; f.von = ""; f.bis = ""; f.lief = false; if (alles) f.kat = 0; }
       kopf.addEventListener("change", function (ev) {
         var t = ev.target, g = t.dataset && t.dataset.g;
         if (g === "her") { if (t.checked) f.her[t.value] = 1; else delete f.her[t.value]; }
-        else if (g && g.indexOf("at:") === 0) { var key = g.slice(3) + "\u0001" + t.value; if (t.checked) f.at[key] = 1; else delete f.at[key]; }
+        else if (g === "fa") { if (t.checked) f.fa[t.value] = 1; else delete f.fa[t.value]; }
         else if (t.classList.contains("osvs-sort")) f.sort = t.value;
         else if (t.classList.contains("osvs-von")) f.von = t.value;
         else if (t.classList.contains("osvs-bis")) f.bis = t.value;
         else if (t.classList.contains("osvs-lief")) f.lief = t.checked;
-        anwenden();
+        zeichneKopf(); anwenden();
       });
       el.addEventListener("click", function (ev) {
         var kb = ev.target.closest(".osvs-kat");
-        if (kb) { f.kat = Number(kb.dataset.kat) || 0; zuruecksetzen(false); f.her = {}; zeichneKopf(); anwenden(); return; }
-        if (ev.target.closest(".osvs-reset")) { zuruecksetzen(false); zeichneKopf(); anwenden(); return; }
-        if (ev.target.closest(".osvs-weiter")) mehr();
+        if (kb) { f.kat = Number(kb.dataset.kat) || 0; zuruecksetzen(false); offen = ""; zeichneKopf(); anwenden(); return; }
+        var dk = ev.target.closest(".osvs-dd-knopf");
+        if (dk) { var id = dk.parentNode.dataset.dd; offen = offen === id ? "" : id; [].forEach.call(kopf.querySelectorAll(".osvs-dd"), function (d) { d.classList.toggle("osvs-dd-auf", d.dataset.dd === offen); }); return; }
+        var mk = ev.target.closest(".osvs-marke");
+        if (mk) {
+          var w = mk.dataset.weg;
+          if (w === "fa") delete f.fa[mk.dataset.wert]; else if (w === "her") delete f.her[mk.dataset.wert];
+          else if (w === "preis") { f.von = ""; f.bis = ""; } else if (w === "lief") f.lief = false;
+          zeichneKopf(); anwenden(); return;
+        }
+        if (ev.target.closest(".osvs-reset")) { zuruecksetzen(false); offen = ""; zeichneKopf(); anwenden(); return; }
+        if (ev.target.closest(".osvs-weiter")) { mehr(); return; }
+      });
+      document.addEventListener("click", function (ev) {
+        if (offen && !ev.target.closest(".osvs-dd")) { offen = ""; [].forEach.call(kopf.querySelectorAll(".osvs-dd"), function (d) { d.classList.remove("osvs-dd-auf"); }); }
       });
       document.body.classList.add("osvs-ergebnis-aktiv");
       schliessen();
       zeichneKopf(); anwenden();
-    }).catch(function () { el.style.display = "none"; });
+    }).catch(function () { el.style.display = "none"; document.body.classList.add("osvs-aus"); });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
 
-  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.6.0" };
+  window.OSVSuche = { laden: laden, suchen: function (q) { return suchen(q); }, version: "0.7.0" };
 })();

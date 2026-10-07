@@ -20,6 +20,8 @@ class OSVSucheRouteServiceProvider extends RouteServiceProvider
             $apiRouter->get('osv-suche/preise', 'IndexController@preise');
             // Verkaufszahlen je Variantennummer speichern (JSON im Body), nur mit Schluessel
             $apiRouter->post('osv-suche/verkauf', 'IndexController@verkauf');
+            // Facetten-Zuordnung je Variante speichern (JSON im Body), nur mit Schluessel
+            $apiRouter->post('osv-suche/facetten', 'IndexController@facetten');
         });
     }
 }

@@ -23,8 +23,9 @@ class IndexController extends Controller
     const PLUGIN     = 'OSVSuche';
     const FILE_KEY   = 'suchindex.json';
     const SALES_KEY  = 'verkauf.json';
+    const FACET_KEY  = 'facetten.json';
     const MAX_IDS    = 24;
-    const VERSION    = '0.6.0';
+    const VERSION    = '0.7.0';
 
     /** @var array Kategoriepfade je ID, beim Neuaufbau gefuellt */
     private $katCache = [];
@@ -53,6 +54,10 @@ class IndexController extends Controller
 
         /** @var StorageRepositoryContract $storage */
         $storage = pluginApp(StorageRepositoryContract::class);
+        $facetten = ['werte' => [], 'v' => []];
+        if ($storage->doesObjectExist(self::PLUGIN, self::FACET_KEY)) {
+            $facetten = json_decode((string)$storage->getObject(self::PLUGIN, self::FACET_KEY)->body, true) ?: $facetten;
+        }
         $sales = [];
         if ($storage->doesObjectExist(self::PLUGIN, self::SALES_KEY)) {
             $sales = json_decode((string)$storage->getObject(self::PLUGIN, self::SALES_KEY)->body, true) ?: [];
@@ -78,6 +83,8 @@ class IndexController extends Controller
                 $doc['kat'] = $this->katPfad((int)$doc['k']);
                 $nr = (string)$doc['nr'];
                 $doc['vk'] = isset($sales[$nr]) ? round((float)$sales[$nr], 1) : 0;
+                $vid = (string)$doc['id'];
+                $doc['fa'] = isset($facetten['v'][$vid]) ? $facetten['v'][$vid] : [];
                 $docs[] = $doc;
             }
             $pageTimes[] = (int)round((microtime(true) - $t0) * 1000);
@@ -93,7 +100,7 @@ class IndexController extends Controller
             'seitenMs'         => $pageTimes,
             'mitVerkauf'       => $this->zaehleVerkauf($docs),
         ];
-        $body = json_encode(['_meta' => $meta, '_cfg' => $this->regeln($config), 'docs' => $docs], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $body = json_encode(['_meta' => $meta, '_cfg' => $this->regeln($config), '_fw' => (object)($facetten['werte'] ?? []), 'docs' => $docs], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         $storage->uploadObject(self::PLUGIN, self::FILE_KEY, $body);
 
@@ -167,6 +174,41 @@ class IndexController extends Controller
         $storage = pluginApp(StorageRepositoryContract::class);
         $storage->uploadObject(self::PLUGIN, self::SALES_KEY, json_encode($clean, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         return ['ok' => true, 'anzahl' => count($clean), 'gespeichert' => date('c')];
+    }
+
+    /**
+     * Facetten-Zuordnung speichern: {"werte":{"16":["Farbe","rot",0,1],...},"v":{"1083":[16,49],...}}
+     * Wird von aussen erzeugt (Shop-Schnittstelle), wirkt beim naechsten Neuaufbau.
+     */
+    public function facetten(Request $request, ConfigRepository $config)
+    {
+        if (!$this->tokenOk($request, $config)) {
+            return ['ok' => false, 'fehler' => 'Schlüssel fehlt oder falsch'];
+        }
+        $data = json_decode((string)$request->getContent(), true);
+        if (!is_array($data) || !isset($data['werte']) || !isset($data['v']) || !is_array($data['werte']) || !is_array($data['v'])) {
+            return ['ok' => false, 'fehler' => 'Format: werte und v erwartet'];
+        }
+        $werte = [];
+        foreach ($data['werte'] as $id => $w) {
+            if (is_array($w) && count($w) >= 2) {
+                $werte[(string)$id] = [(string)$w[0], (string)$w[1], (int)($w[2] ?? 0), (int)($w[3] ?? 0)];
+            }
+        }
+        $v = [];
+        foreach ($data['v'] as $vid => $ids) {
+            if (is_array($ids)) {
+                $liste = [];
+                foreach ($ids as $id) {
+                    $liste[] = (int)$id;
+                }
+                $v[(string)$vid] = $liste;
+            }
+        }
+        /** @var StorageRepositoryContract $storage */
+        $storage = pluginApp(StorageRepositoryContract::class);
+        $storage->uploadObject(self::PLUGIN, self::FACET_KEY, json_encode(['werte' => (object)$werte, 'v' => (object)$v], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        return ['ok' => true, 'werte' => count($werte), 'varianten' => count($v), 'gespeichert' => date('c')];
     }
 
     private function tokenOk(Request $request, ConfigRepository $config): bool

@@ -1,0 +1,11 @@
+<style>
+/* OSVSuche: Auf der Ergebnisseite Plentys Liste von Anfang an ausblenden, solange unsere Ergebnisse laden.
+   body.osvs-aus = unsere Suche hat nichts gefunden oder ist ausgefallen -> Plentys Seite bleibt sichtbar. */
+body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),
+body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-pagination,
+body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-toolbar,
+body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-selected-filter,
+body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-filter-base{display:none!important}
+body:not(.osvs-ergebnis-aktiv):not(.osvs-aus) .osvs-ergebnis{min-height:60vh}
+body:not(.osvs-ergebnis-aktiv):not(.osvs-aus) .osvs-ergebnis-kopf::before{content:"Suchergebnisse werden geladen …";display:block;color:#7a8594;font-size:15px;padding:8px 0}
+</style>

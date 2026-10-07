@@ -2,7 +2,7 @@
   "name": "OSVSuche",
   "namespace": "OSVSuche",
   "type": "general",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "license": "proprietary",
   "author": "OSV",
   "shortDescription": "Eigene Shop-Suche: Sofort-Liste am Suchfeld mit Tippfehler-Toleranz, Synonymen und Verkaufsbonus.",
@@ -24,6 +24,12 @@
       "name": "OSV Suche Sofort-Liste",
       "description": "Bindet die Sofort-Suche am Ceres-Suchfeld ein.",
       "defaultLayoutContainer": "Ceres::Script.AfterScriptsLoaded"
+    },
+    {
+      "key": "OSVSuche\\Containers\\SucheKopf",
+      "name": "OSV Suche Kopf",
+      "description": "CSS im Seitenkopf: verhindert das Aufblitzen der alten Ergebnisliste.",
+      "defaultLayoutContainer": "Ceres::Template.Style"
     }
   ]
 }
