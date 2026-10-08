@@ -20,7 +20,7 @@
     if (/mann$/.test(t)) return t;
     return t.replace(/(oegen|ogen)$/, "ogen").replace(/(chen|innen|ern|en|er|e|n|s)$/, "");
   }
-  var STOP = {}; "mit und fuer der die das den dem des ein eine einer einem eines aus von vom zum zur im in am an auf ohne als oder ganz sehr cm mm m hoch gross grosse grosser kleine klein kleiner neu neue neuer nr stueck stk inh ek e.k gmbh kg eg co erzgeb original".split(" ").forEach(function (w) { STOP[w] = 1; });
+  var STOP = {}; "mit und fuer fuers der die das den dem des ein eine einer einem eines aus von vom zum zur im in am an auf ohne als oder ganz sehr cm mm m hoch gross grosse grosser kleine klein kleiner neu neue neuer nr stueck stk inh ek e.k gmbh kg eg co erzgeb original".split(" ").forEach(function (w) { STOP[w] = 1; });
   var FW = {}, ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
 
   function processTerm(t) {
@@ -86,18 +86,26 @@
     var sa = (!VOCAB[w] && !istAnfang(w)) ? synAnfang(w) : null; if (sa) return sa;
     if (bekannt(w) || w.length < 5) return null;
     var max = w.length >= 12 ? 3 : (w.length >= 9 ? 2 : 1), best = null, bd = 99, bl = 99, bf = 0;
-    for (var v in VOCAB) {
-      if (v.slice(0, 2) !== w.slice(0, 2)) continue;
+    // Kandidaten: gleiche zwei Anfangsbuchstaben; bei kurzen Woertern sonst nur vertauschte Buchstaben 2/3
+    // ("barun" -> "braun"); erst ab 7 Buchstaben darf auch der erste Buchstabe falsch sein, fehlen oder zu viel sein
+    // ("eäucherhäuschen" -> "räucherhäuschen"). Synonym-Woerter zaehlen mit
+    var kand = {}; for (var v0 in VOCAB) kand[v0] = 1; for (var s0 in SYN) if (!kand[s0]) kand[s0] = 2;
+    for (var v in kand) {
+      var gleich = v.slice(0, 2) === w.slice(0, 2) || (v[0] === w[0] && v[1] === w[2] && v[2] === w[1]);
+      if (!gleich && !(w.length >= 7 && (v[0] === w[0] || v.slice(1, 3) === w.slice(1, 3) || v.slice(0, 2) === w.slice(1, 3)))) continue;
       var ld = Math.abs(v.length - w.length), dd = ld > 2 ? 99 : dl(w, v);
       if (v.length >= w.length) {
         // Wortanfang mit Tippfehler ("herrenhu" -> "herrnhut"): gegen gleich lange Anfaenge vergleichen,
         // bei gleichem Abstand gewinnt das kuerzere Wort ("nussknacker" vor "nussknackerwerkstatt")
         for (var k = -1; k <= 1; k++) { var pre = v.slice(0, w.length + k); if (pre.length >= 4) { var dp = dl(w, pre), lp = (v.length - w.length) / 100; if (dp < dd || (dp === dd && lp < ld)) { dd = dp; ld = lp; } } }
       }
+      if (kand[v] === 2 && dd > 1) continue; // Synonym-Wort nur bei genau einem Tippfehler
+      if (!gleich) dd += 1;                 // anderer Wortanfang: muss deutlich naeher liegen
       if (dd > max) continue;
-      if (dd < bd || (dd === bd && (ld < bl || (ld === bl && VFREQ[v] > bf)))) { best = v; bd = dd; bl = ld; bf = VFREQ[v]; }
+      if (dd < bd || (dd === bd && (ld < bl || (ld === bl && (VFREQ[v] || 0) > bf)))) { best = v; bd = dd; bl = ld; bf = VFREQ[v] || 0; }
     }
-    return best;
+    // Treffer ist ein Synonym-Wort: gleich das gemeinte Wort nehmen
+    return best && kand[best] === 2 ? stem(SYN[best]) : best;
   }
   function meinten(q) {
     var terms = [], weg = [], geaendert = false;
@@ -107,7 +115,9 @@
         var sa = (!VOCAB[w] && !istAnfang(w)) ? synAnfang(w) : null;
         if (sa) { terms.push(sa); geaendert = true; return; }
         if (bekannt(w)) { terms.push(w); return; }
-        var c = korrektur(w);
+        // Wortstamm kann zu kurz fuer die Korrektur sein ("barun" -> "baru"): dann das ganze Wort pruefen
+        var c = korrektur(w), roh = norm(tok);
+        if (!c && roh !== w) { c = korrektur(roh); if (c && (Math.abs(c.length - roh.length) > 1 || dl(roh, c) > 1)) c = null; }
         if (c) { terms.push(c); geaendert = true; } else { weg.push(tok); geaendert = true; }
       });
     });
