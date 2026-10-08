@@ -2381,6 +2381,7 @@
     else if (ev.key === "Enter" && st.sel >= 0) {
       ev.preventDefault(); ev.stopImmediatePropagation();
       st.gehe = st.items[st.sel].d.u;
+      gaKlick(st.items[st.sel].d, "Suche Liste");
       window.location.href = st.gehe;
     }
 
@@ -2613,11 +2614,29 @@
     if (typeof window.gtag !== "function" || !gaErlaubt()) return;
     try { window.gtag("event", "view_search_results", { search_term: q, send_to: GA4_ID }); } catch (e) { /* Tracking darf die Suche nie stoeren */ }
   }
+  // GA4: Klick auf einen Artikel aus der Suche (Liste unter dem Suchfeld oder Ergebnisse), nur mit Einwilligung
+  function gaKlick(d, liste) {
+    if (!d || typeof window.gtag !== "function" || !gaErlaubt()) return;
+    try {
+      window.gtag("event", "select_item", { item_list_name: liste, items: [{ item_id: String(d.id), item_name: d.n + (d.v ? " " + d.v : ""), item_brand: d.h || "" }], send_to: GA4_ID });
+    } catch (e) { /* Tracking darf die Suche nie stoeren */ }
+  }
+  document.addEventListener("click", function (ev) {
+    var a = ev.target && ev.target.closest && ev.target.closest("a[href]"); if (!a) return;
+    var hit = a.closest(".osvs-panel .osvs-hit");
+    if (hit) { var x = st.items && st.items[+hit.getAttribute("data-i")]; gaKlick(x && x.d, "Suche Liste"); return; }
+    var k = a.closest(".osvs-kachel");
+    if (k) { var p = k.querySelector(".osvs-p"); gaKlick(p && st.byId && st.byId[p.getAttribute("data-id")], "Suche Ergebnis"); }
+  }, true);
+
+  // Tab-Titel waehrend der Ebene wie Plentys Ergebnisseite, damit GA4 und Verlauf die Suche richtig benennen
+  var TITEL_SUCHE = "Artikelsuchergebnisse | Seiffener Volkskunst", altTitel = null;
   var schicht = null;
   function schichtZu() {
     if (!schicht) return;
     schicht.remove(); schicht = null;
     document.documentElement.classList.remove("osvs-sofort-offen");
+    if (altTitel !== null) { document.title = altTitel; altTitel = null; }
   }
   function sofort(q, eingabe) {
     q = (q || "").trim(); if (q.length < 2) return false;
@@ -2657,6 +2676,8 @@
     schicht.firstChild.appendChild(fussnote);
     document.body.appendChild(schicht);
     document.documentElement.classList.add("osvs-sofort-offen");
+    if (altTitel === null) altTitel = document.title;
+    document.title = TITEL_SUCHE; // vor dem Adresswechsel, damit GA4 den Titel mit der neuen Adresse erfasst
     if (!history.state || !history.state.osvs) history.pushState({ osvs: q, ebene: true }, "", url);
     else history.replaceState({ osvs: q, ebene: true }, "", url);
     ergebnisRendern(el2, q, function () { schichtZu(); plenty(); }, function () { gaSuche(q); });
@@ -2676,5 +2697,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.0" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.4" };
 })();
