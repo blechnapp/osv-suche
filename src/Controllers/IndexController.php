@@ -25,7 +25,7 @@ class IndexController extends Controller
     const SALES_KEY  = 'verkauf.json';
     const FACET_KEY  = 'facetten.json';
     const MAX_IDS    = 24;
-    const VERSION    = '0.9.4';
+    const VERSION    = '0.9.5';
     const STAND_KEY  = 'stand.txt';
 
     /** @var array Kategoriepfade je ID, beim Neuaufbau gefuellt */

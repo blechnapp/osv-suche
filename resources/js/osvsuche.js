@@ -2381,7 +2381,7 @@
     else if (ev.key === "Enter" && st.sel >= 0) {
       ev.preventDefault(); ev.stopImmediatePropagation();
       st.gehe = st.items[st.sel].d.u;
-      gaKlick(st.items[st.sel].d, "Suche Liste");
+      gaKlick(st.items[st.sel].d, "Suche Liste", st.sel + 1);
       window.location.href = st.gehe;
     }
 
@@ -2443,7 +2443,7 @@
         alle = suchen(k.terms.join(" "), true);
         if (alle.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
       } else if (!k) alle = suchen(q, true);
-      if (!alle.length) { leer(); return; } // Plentys Seite bleibt stehen
+      if (!alle.length) { gaOhneTreffer(q); leer(); return; } // Plentys Seite bleibt stehen
       if (gefunden) gefunden(alle.length);
       alle.forEach(function (x, i) { x.rang = i; x.preis = preisZahl(x.d.p); });
       // Passende Kategorien: Standardkategorie je Treffer, nach Anzahl, ohne Sammelkategorien
@@ -2554,10 +2554,16 @@
         else if (t.classList.contains("osvs-bis")) f.bis = t.value;
         else if (t.classList.contains("osvs-lief")) f.lief = t.checked;
         zeichneKopf(); anwenden();
+        var typ = g === "her" ? "hersteller" : g === "fa" ? (t.dataset.gruppe || "facette") : t.classList.contains("osvs-sort") ? "sortierung" :
+          (t.classList.contains("osvs-von") || t.classList.contains("osvs-bis")) ? "preis" : t.classList.contains("osvs-lief") ? "lieferbar" : "";
+        if (typ) {
+          var wert = g === "fa" ? ((FW[t.value] || [])[1] || t.value) : typ === "preis" ? (f.von || "") + "-" + (f.bis || "") : typ === "lieferbar" ? (t.checked ? "an" : "aus") : t.value;
+          gaFilter(q, typ, (g && !t.checked ? "aus: " : "") + wert, treffer.length);
+        }
       });
       el.addEventListener("click", function (ev) {
         var kb = ev.target.closest(".osvs-kat");
-        if (kb) { f.kat = Number(kb.dataset.kat) || 0; zuruecksetzen(false); offen = ""; zeichneKopf(); anwenden(); return; }
+        if (kb) { f.kat = Number(kb.dataset.kat) || 0; zuruecksetzen(false); offen = ""; zeichneKopf(); anwenden(); gaFilter(q, "kategorie", f.kat ? katName[f.kat] : "Alle", treffer.length); return; }
         var dk = ev.target.closest(".osvs-dd-knopf");
         if (dk) { var id = dk.parentNode.dataset.dd; offen = offen === id ? "" : id; [].forEach.call(kopf.querySelectorAll(".osvs-dd"), function (d) { d.classList.toggle("osvs-dd-auf", d.dataset.dd === offen); }); return; }
         var mk = ev.target.closest(".osvs-marke");
@@ -2565,10 +2571,10 @@
           var w = mk.dataset.weg;
           if (w === "fa") delete f.fa[mk.dataset.wert]; else if (w === "her") delete f.her[mk.dataset.wert];
           else if (w === "preis") { f.von = ""; f.bis = ""; } else if (w === "lief") f.lief = false;
-          zeichneKopf(); anwenden(); return;
+          zeichneKopf(); anwenden(); gaFilter(q, "entfernt", w, treffer.length); return;
         }
-        if (ev.target.closest(".osvs-reset")) { zuruecksetzen(false); offen = ""; zeichneKopf(); anwenden(); return; }
-        if (ev.target.closest(".osvs-weiter")) { mehr(); return; }
+        if (ev.target.closest(".osvs-reset")) { zuruecksetzen(false); offen = ""; zeichneKopf(); anwenden(); gaFilter(q, "zuruecksetzen", "", treffer.length); return; }
+        if (ev.target.closest(".osvs-weiter")) { mehr(); gaFilter(q, "weitere_anzeigen", String(n), treffer.length); return; }
       });
       document.addEventListener("click", function (ev) {
         if (offen && !ev.target.closest(".osvs-dd")) { offen = ""; [].forEach.call(kopf.querySelectorAll(".osvs-dd"), function (d) { d.classList.remove("osvs-dd-auf"); }); }
@@ -2610,23 +2616,36 @@
       return !!(c && c.tracking && c.tracking.googleanalytics === true);
     } catch (e) { return false; }
   }
-  function gaSuche(q) {
+  function gaEreignis(name, daten) {
     if (typeof window.gtag !== "function" || !gaErlaubt()) return;
-    try { window.gtag("event", "view_search_results", { search_term: q, send_to: GA4_ID }); } catch (e) { /* Tracking darf die Suche nie stoeren */ }
+    daten.send_to = GA4_ID;
+    try { window.gtag("event", name, daten); } catch (e) { /* Tracking darf die Suche nie stoeren */ }
   }
+  function gaSuche(q, n) { gaEreignis("view_search_results", { search_term: q, treffer: n || 0 }); }
+  // Plentys Seite meldet die Suche danach selbst als view_search_results, deshalb eigener Name (keine Doppelzaehlung)
+  function gaOhneTreffer(q) {
+    // nach Enter ohne Treffer laedt Plentys Seite mit derselben Suche: dort nicht noch einmal melden
+    var schon = ""; try { schon = sessionStorage.getItem("osvs_ohne") || ""; sessionStorage.removeItem("osvs_ohne"); } catch (e) { /* egal */ }
+    if (schon === q) return;
+    try { sessionStorage.setItem("osvs_ohne", q); } catch (e) { /* egal */ }
+    gaEreignis("suche_ohne_treffer", { search_term: q });
+  }
+  function gaFilter(q, typ, wert, n) { gaEreignis("suche_filter", { search_term: q, filter_typ: typ, filter_wert: String(wert || "").slice(0, 90), treffer: n }); }
   // GA4: Klick auf einen Artikel aus der Suche (Liste unter dem Suchfeld oder Ergebnisse), nur mit Einwilligung
-  function gaKlick(d, liste) {
-    if (!d || typeof window.gtag !== "function" || !gaErlaubt()) return;
-    try {
-      window.gtag("event", "select_item", { item_list_name: liste, items: [{ item_id: String(d.id), item_name: d.n + (d.v ? " " + d.v : ""), item_brand: d.h || "" }], send_to: GA4_ID });
-    } catch (e) { /* Tracking darf die Suche nie stoeren */ }
+  // Position ab 1: erster Treffer = 1
+  function gaKlick(d, liste, pos) {
+    if (!d) return;
+    gaEreignis("select_item", { item_list_name: liste, items: [{ item_id: String(d.id), item_name: d.n + (d.v ? " " + d.v : ""), item_brand: d.h || "", index: pos || 0, item_list_name: liste }] });
   }
   document.addEventListener("click", function (ev) {
     var a = ev.target && ev.target.closest && ev.target.closest("a[href]"); if (!a) return;
     var hit = a.closest(".osvs-panel .osvs-hit");
-    if (hit) { var x = st.items && st.items[+hit.getAttribute("data-i")]; gaKlick(x && x.d, "Suche Liste"); return; }
+    if (hit) { var i = +hit.getAttribute("data-i"), x = st.items && st.items[i]; gaKlick(x && x.d, "Suche Liste", i + 1); return; }
     var k = a.closest(".osvs-kachel");
-    if (k) { var p = k.querySelector(".osvs-p"); gaKlick(p && st.byId && st.byId[p.getAttribute("data-id")], "Suche Ergebnis"); }
+    if (k) {
+      var p = k.querySelector(".osvs-p"), li = k.closest("li"), pos = li && li.parentNode ? [].indexOf.call(li.parentNode.children, li) + 1 : 0;
+      gaKlick(p && st.byId && st.byId[p.getAttribute("data-id")], "Suche Ergebnis", pos);
+    }
   }, true);
 
   // Tab-Titel waehrend der Ebene wie Plentys Ergebnisseite, damit GA4 und Verlauf die Suche richtig benennen
@@ -2652,7 +2671,7 @@
       ueberschrift(q);
       history.pushState({ osvs: q }, "", url);
       // ohne Treffer meldet Plentys Seite die Suche selbst, deshalb nur bei eigenen Treffern melden
-      ergebnisRendern(el, q, plenty, function () { gaSuche(q); });
+      ergebnisRendern(el, q, plenty, function (n) { gaSuche(q, n); });
       window.scrollTo(0, 0);
       return true;
     }
@@ -2680,7 +2699,7 @@
     document.title = TITEL_SUCHE; // vor dem Adresswechsel, damit GA4 den Titel mit der neuen Adresse erfasst
     if (!history.state || !history.state.osvs) history.pushState({ osvs: q, ebene: true }, "", url);
     else history.replaceState({ osvs: q, ebene: true }, "", url);
-    ergebnisRendern(el2, q, function () { schichtZu(); plenty(); }, function () { gaSuche(q); });
+    ergebnisRendern(el2, q, function () { schichtZu(); plenty(); }, function (n) { gaSuche(q, n); });
     return true;
   }
   document.addEventListener("click", function (ev) {
@@ -2697,5 +2716,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.4" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.5" };
 })();
