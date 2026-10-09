@@ -635,13 +635,38 @@
 
   // Tab-Titel waehrend der Ebene wie Plentys Ergebnisseite, damit GA4 und Verlauf die Suche richtig benennen
   var TITEL_SUCHE = "Artikelsuchergebnisse | Seiffener Volkskunst", altTitel = null;
-  var schicht = null;
+  var schicht = null, merkY = 0;
+  // Ebene beginnt unter dem Shop-Kopf (Logo, Menue, Warenkorb bleiben sichtbar).
+  // Ceres schaltet den Kopf nach dem ersten Scrollen um (fixed-top), danach meldet er die Hoehe 0, obwohl er
+  // oben sichtbar ist. Deshalb messen, solange die Seite ganz oben steht, und diesen Wert verwenden.
+  var kopfMass = 0;
+  function kopfMessen() {
+    if ((window.scrollY || 0) > 0) return;
+    var h = document.getElementById("page-header-parent") || document.getElementById("page-header");
+    var b = h ? h.getBoundingClientRect().bottom : 0;
+    // die Brotkruemel ("Zur Startseite / Sale") gehoeren nicht zur Suche: Ebene beginnt ueber ihnen
+    var bc = h && h.querySelector(".breadcrumbs");
+    if (bc) { var r = bc.getBoundingClientRect(); if (r.height > 0 && r.top > 0) b = r.top; }
+    if (b > 0) kopfMass = b;
+  }
+  kopfMessen();
+  window.addEventListener("scroll", kopfMessen, { passive: true });
+  function schichtOben() {
+    if (!schicht) return;
+    kopfMessen();
+    schicht.style.top = Math.max(0, kopfMass) + "px";
+  }
   function schichtZu() {
     if (!schicht) return;
     schicht.remove(); schicht = null;
     document.documentElement.classList.remove("osvs-sofort-offen");
     if (altTitel !== null) { document.title = altTitel; altTitel = null; }
+    // zurueck an die Stelle vor der Suche; nach "Zurueck" setzt der Browser die Position selbst, deshalb kurz danach noch einmal
+    var y = merkY;
+    window.scrollTo({ top: y, left: 0, behavior: "instant" });
+    setTimeout(function () { window.scrollTo({ top: y, left: 0, behavior: "instant" }); }, 50);
   }
+  window.addEventListener("resize", schichtOben);
   function sofort(q, eingabe) {
     q = (q || "").trim(); if (q.length < 2) return false;
     var plenty = function () { var k = meinten(q); var w = k && k.terms.length ? k.terms.map(function (x) { return VSHOW[x] || x; }).join(" ") : q; window.location.href = SUCH_URL + encodeURIComponent(w); };
@@ -660,13 +685,14 @@
       window.scrollTo(0, 0);
       return true;
     }
-    // auf jeder anderen Seite: Ergebnisse als Ebene ueber dem Inhalt, unter dem Kopf
+    // auf jeder anderen Seite: Ergebnisse als Ebene ueber dem Inhalt, unter dem Kopf.
+    // Wer weiter unten war, sieht den Kopf nicht mehr: Seite darunter nach oben holen, Stelle merken
     schichtZu();
-    var kopfHoehe = 0, h = document.getElementById("page-header");
-    if (h) kopfHoehe = Math.max(0, h.getBoundingClientRect().bottom);
+    merkY = window.scrollY || 0;
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     schicht = document.createElement("div");
     schicht.className = "osvs-sofort";
-    schicht.style.top = kopfHoehe + "px";
+    schichtOben();
     schicht.innerHTML = '<div class="container-max"><div class="osvs-sofort-kopf"><h1 class="h2">Suchergebnisse für: ' + esc(q) + '</h1><button type="button" class="osvs-sofort-zu" aria-label="Schließen">×</button></div></div>';
     var el2 = frischesWidget(null);
     schicht.firstChild.appendChild(el2);
@@ -701,5 +727,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.5" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.6" };
 })();
