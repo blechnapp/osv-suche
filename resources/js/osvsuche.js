@@ -2022,7 +2022,7 @@
   if (window.OSVSuche) return;
   (function () { var st = document.createElement("style"); st.id = "osvs-css"; st.textContent = "/* Ceres-Vorschlaege ausblenden, sobald unsere Suche bereit ist; nur bei 'nichts gefunden' (osvs-ceres) zeigen */body.osvs-bereit:not(.osvs-ceres) .autocomplete-suggestions{display:none!important}.osvs-panel{display:none;position:absolute;top:100%;left:0;right:0;z-index:1100;background:#fff;border:1px solid #e3e0d9;border-radius:0 0 6px 6px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:75vh;overflow-y:auto;text-align:left}.osvs-hinweis{padding:8px 12px;font-size:13px;background:#fffbeb;color:#7c4a03;border-bottom:1px solid #f0e6c8}.osvs-hit{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0ede6;color:#1d2433;text-decoration:none}.osvs-hit:hover,.osvs-hit.osvs-sel{background:#f7f5f0;text-decoration:none;color:#1d2433}.osvs-hit img{width:48px;height:48px;object-fit:contain;flex:0 0 48px;background:#fff}.osvs-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.3}.osvs-n{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis}.osvs-v{font-size:12px;color:#6b7280}.osvs-p{flex:0 0 auto;font-weight:600;font-size:14px;white-space:nowrap}.osvs-uvp{color:#9ca3af;font-weight:400;margin-right:4px}.osvs-panel mark{background:#fde68a;padding:0;color:inherit}.osvs-mehr{background:#f7f5f0}.osvs-alle{display:block;padding:10px 12px;font-size:14px;color:#1f3a5f;font-weight:600}@media (max-width:767px){.osvs-panel{border-radius:6px;max-height:65vh}.osvs-hit img{width:44px;height:44px;flex-basis:44px}.osvs-n{font-size:14px;white-space:normal}.osvs-txt{word-break:normal;hyphens:auto}}/* Ergebnisseite: Plentys Raster, Toolbar, Filter und Seitenblaettern ausblenden, solange unser Widget Treffer zeigt */body.osvs-ergebnis-aktiv .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),body.osvs-ergebnis-aktiv .widget-pagination,body.osvs-ergebnis-aktiv .widget-toolbar,body.osvs-ergebnis-aktiv .widget-selected-filter,body.osvs-ergebnis-aktiv .widget-filter-base,body.osvs-ergebnis-aktiv .widget-items-per-page,body.osvs-ergebnis-aktiv .widget-item-sorting{display:none!important}.osvs-ergebnis-zahl{font-weight:600;margin:0 0 8px}.osvs-ergebnis .osvs-hinweis{display:inline-block;border-radius:4px;margin:0 0 12px}.osvs-ergebnis-fuss{margin:16px 0 24px}.osvs-kopf-zeile .osvs-ergebnis-zahl{font-size:15px;color:#555;margin:0 0 10px}.osvs-kats{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;margin:0 0 4px;scrollbar-width:thin}.osvs-kat{flex:0 0 auto;border:1px solid #c9ced6;background:#fff;color:#04305e;border-radius:20px;padding:7px 16px;font-size:14px;cursor:pointer;white-space:nowrap;transition:background .15s}.osvs-kat:hover{border-color:#04305e}.osvs-kat small{margin-left:6px;color:#7a8594;font-size:12px}.osvs-kat-an{background:#04305e;color:#fff;border-color:#04305e}.osvs-kat-an small{color:#c8d3e6}.osvs-leiste{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #e3e6ea;border-bottom:1px solid #e3e6ea;margin-bottom:12px}.osvs-dd{position:relative}.osvs-dd-knopf{border:1px solid #c9ced6;background:#fff;color:#212529;border-radius:4px;padding:7px 12px;font-size:14px;cursor:pointer;white-space:nowrap}.osvs-dd-knopf:hover,.osvs-dd-auf .osvs-dd-knopf{border-color:#04305e}.osvs-dd-aktiv{border-color:#04305e;color:#04305e;font-weight:600}.osvs-dd-zahl{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#04305e;color:#fff;font-size:11px;text-align:center;margin-left:4px}.osvs-dd-pfeil{font-size:11px;margin-left:4px;color:#7a8594}.osvs-dd-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:50;background:#fff;border:1px solid #d5dae1;border-radius:6px;box-shadow:0 10px 28px rgba(0,0,0,.14);padding:8px;min-width:240px;max-width:340px;max-height:320px;overflow-y:auto}.osvs-dd-auf .osvs-dd-panel{display:block}.osvs-opt{display:flex;align-items:center;gap:8px;margin:0;padding:6px 8px;border-radius:4px;font-size:14px;cursor:pointer}.osvs-opt:hover{background:#f3f5f8}.osvs-opt span{flex:1}.osvs-opt small{color:#7a8594}.osvs-preis{display:flex;align-items:center;gap:8px;padding:4px}.osvs-preis input{width:100px}.osvs-schalter{display:inline-flex;align-items:center;gap:8px;margin:0;font-size:14px;cursor:pointer}.osvs-sortierung{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:14px}.osvs-sortierung label{margin:0;color:#555}.osvs-sort{border:1px solid #c9ced6;border-radius:4px;padding:6px 8px;font-size:14px;background:#fff}.osvs-marken{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}.osvs-marke{border:0;background:#e8eef6;color:#04305e;border-radius:16px;padding:5px 12px;font-size:13px;cursor:pointer}.osvs-reset{border:0;background:none;color:#04305e;text-decoration:underline;font-size:13px;cursor:pointer;padding:5px 4px}.osvs-f-tipp{font-size:13px;color:#7a8594;margin:-4px 0 14px}.osvs-ansehen{display:block;width:100%;margin:8px 0}@media (max-width:767px){.osvs-kats{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}.osvs-leiste{gap:8px}.osvs-dd-knopf{padding:6px 10px;font-size:13px}.osvs-schalter{font-size:13px}.osvs-sortierung{margin-left:0;width:100%}.osvs-sortierung label{display:inline}.osvs-sort{flex:1}.osvs-dd{position:static}.osvs-leiste{position:relative}.osvs-dd-panel{left:0;right:0;max-width:none;min-width:0}}/* Sofort-Ergebnisse als Ebene */.osvs-sofort{position:fixed;left:0;right:0;bottom:0;z-index:1040;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 0 40px}.osvs-sofort .container-max{padding:0 15px}.osvs-sofort-kopf{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px}.osvs-sofort-kopf h1{margin:0}.osvs-sofort-zu{border:0;background:#f2f4f7;border-radius:50%;width:40px;height:40px;font-size:24px;line-height:40px;cursor:pointer;flex:0 0 40px}html.osvs-sofort-offen body{overflow:hidden}.osvs-sofort-fussnote{padding:16px 0 110px}"; document.head.appendChild(st); })();
   var GA4_ID = "G-YV5JF3R917", INDEX_URL = "/rest/osv-suche/index", PREIS_URL = "/rest/osv-suche/preise", SUCH_URL = "/artikelsuchergebnisse/?query=";
-  var CACHE_KEY = "osvsuche_index_v1", CACHE_MS = 60 * 60 * 1000, MAX = 8;
+  var CACHE_KEY = "osvsuche_index_v1", CACHE_MS = 60 * 60 * 1000, MAX = 8, ZU_MS = 700;
   var st = { laden: null, ms: null, docs: null, byId: null, cfg: null, panel: null, input: null, sel: -1, items: [], q: "" };
 
   // ---------- Wortaufbereitung ----------
@@ -2036,7 +2036,7 @@
     return t.replace(/(oegen|ogen)$/, "ogen").replace(/(chen|innen|ern|en|er|e|n|s)$/, "");
   }
   var STOP = {}; "mit und fuer fuers der die das den dem des ein eine einer einem eines aus von vom zum zur im in am an auf ohne als oder ganz sehr cm mm m hoch gross grosse grosser kleine klein kleiner neu neue neuer nr stueck stk inh ek e.k gmbh kg eg co erzgeb original".split(" ").forEach(function (w) { STOP[w] = 1; });
-  var FW = {}, ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
+  var FW = {}, ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, KWW = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
 
   function processTerm(t) {
     var x = norm(t).replace(/[.,;:!?()]/g, "");
@@ -2089,6 +2089,9 @@
     return d[m][n];
   }
   function istAnfang(w) { if (w.length < 3) return true; for (var v in VOCAB) if (v.indexOf(w) === 0) return true; return false; }
+  // Anfang eines ungekuerzten Worts oder Wortteils aus dem Index ("raeuchermaennch" -> "raeuchermaennchen", Stamm ist
+  // "raeuchermann"; "kal" -> Wortteil "kalender" aus "wandkalender")
+  function rohAnfang(w) { var v; for (v in ROH) if (v.indexOf(w) === 0) return true; for (v in TEILE) if (v.indexOf(w) === 0) return true; return false; }
   function bekannt(w) { return VOCAB[w] || TEILE[w] || /\d/.test(w) || istAnfang(w); }
   // Getipptes ist der Anfang eines Synonyms ("schwipp" -> "schwippbogen" -> schwibbogen): Synonym gewinnt
   function synAnfang(w) {
@@ -2123,7 +2126,7 @@
     return best && kand[best] === 2 ? stem(SYN[best]) : best;
   }
   function meinten(q) {
-    var terms = [], weg = [], geaendert = false;
+    var terms = [], weg = [], geaendert = false, retten = [], rettenTok = [];
     tokenize(q).forEach(function (tok) {
       var r = queryTerm(tok); if (!r) return;
       r.forEach(function (w) {
@@ -2133,9 +2136,12 @@
         // Wortstamm kann zu kurz fuer die Korrektur sein ("barun" -> "baru"): dann das ganze Wort pruefen
         var c = korrektur(w), roh = norm(tok);
         if (!c && roh !== w) { c = korrektur(roh); if (c && (Math.abs(c.length - roh.length) > 1 || dl(roh, c) > 1)) c = null; }
-        if (c) { terms.push(c); geaendert = true; } else { weg.push(tok); geaendert = true; }
+        if (c) { terms.push(c); geaendert = true; } else { if (KWW[w]) { retten.push(w); rettenTok.push(tok); } weg.push(tok); geaendert = true; }
       });
     });
+    // Wort nur in den Keywords ("acdc"): nur nehmen, wenn sonst gar nichts uebrig bliebe. Zu VOCAB gehoert kw nicht,
+    // sonst wuerden Keyword-Woerter nicht mehr zerlegt und nicht mehr unscharf gesucht (261 Suchbegriffe schlechter)
+    if (!terms.length && retten.length) return { terms: retten, weg: weg.filter(function (t) { return rettenTok.indexOf(t) < 0; }) };
     return geaendert ? { terms: terms, weg: weg } : null;
   }
 
@@ -2169,6 +2175,8 @@
         });
       });
     });
+    KWW = {};
+    docs.forEach(function (d) { tokenize(d.kw || "").forEach(function (t) { var r = processTerm(t); if (r) r.forEach(function (w) { KWW[w] = 1; }); }); });
     st.ms = new MiniSearch({
       idField: "id", fields: ["n", "v", "a", "nr", "e", "h", "kat", "t", "fx", "kw", "sw"], storeFields: ["i", "h", "vk"],
       processTerm: processTerm, tokenize: tokenize,
@@ -2300,10 +2308,19 @@
         return VSHOW[stem(z)] || z;
       }).join(" ");
     }
+    clearTimeout(st.zuTimer);
     if (!items.length) {
-      // Wer gerade weitertippt ("herrenu" nach "herren"), behaelt die letzte Liste; sonst Ceres-Rueckfall
-      if (st.letzteQ && (q.indexOf(st.letzteQ) === 0 || st.letzteQ.indexOf(q) === 0) && st.panel && st.panel.style.display === "block") return;
-      schliessen(); st.alle = []; ceresErlauben(true); return; // wirklich nichts gefunden: Plenty darf helfen
+      var nichts = function () { schliessen(); st.alle = []; ceresErlauben(true); }; // wirklich nichts gefunden: Plenty darf helfen
+      // Wer gerade weitertippt ("herrenu" nach "herren"), behaelt die letzte Liste
+      if (st.letzteQ && (q.indexOf(st.letzteQ) === 0 || st.letzteQ.indexOf(q) === 0) && st.panel && st.panel.style.display === "block") {
+        // Kann das letzte Wort kein bekanntes Wort mehr werden ("simson" nach der Liste von "si"), geht die Liste zu,
+        // sobald eine Weile nicht getippt wird – beim fluessigen Tippen ueber Tippfehler hinweg springt nichts
+        var toks = tokenize(q), letztes = toks.length ? norm(toks[toks.length - 1]).replace(/[.,;:!?()]/g, "") : "";
+        if (!(istAnfang(letztes) || synAnfang(letztes) || (processTerm(letztes) || []).some(istAnfang) || rohAnfang(letztes)))
+          st.zuTimer = setTimeout(function () { if (st.q === q) nichts(); }, ZU_MS);
+        return;
+      }
+      nichts(); return;
     }
     st.letzteQ = q; ceresErlauben(false);
     var p = panelFuer(input);
@@ -2742,5 +2759,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.6" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.7" };
 })();

@@ -7,7 +7,7 @@
   if (window.OSVSuche) return;
   (function () { var st = document.createElement("style"); st.id = "osvs-css"; st.textContent = "/*CSS*/"; document.head.appendChild(st); })();
   var GA4_ID = "G-YV5JF3R917", INDEX_URL = "/rest/osv-suche/index", PREIS_URL = "/rest/osv-suche/preise", SUCH_URL = "/artikelsuchergebnisse/?query=";
-  var CACHE_KEY = "osvsuche_index_v1", CACHE_MS = 60 * 60 * 1000, MAX = 8;
+  var CACHE_KEY = "osvsuche_index_v1", CACHE_MS = 60 * 60 * 1000, MAX = 8, ZU_MS = 700;
   var st = { laden: null, ms: null, docs: null, byId: null, cfg: null, panel: null, input: null, sel: -1, items: [], q: "" };
 
   // ---------- Wortaufbereitung ----------
@@ -21,7 +21,7 @@
     return t.replace(/(oegen|ogen)$/, "ogen").replace(/(chen|innen|ern|en|er|e|n|s)$/, "");
   }
   var STOP = {}; "mit und fuer fuers der die das den dem des ein eine einer einem eines aus von vom zum zur im in am an auf ohne als oder ganz sehr cm mm m hoch gross grosse grosser kleine klein kleiner neu neue neuer nr stueck stk inh ek e.k gmbh kg eg co erzgeb original".split(" ").forEach(function (w) { STOP[w] = 1; });
-  var FW = {}, ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
+  var FW = {}, ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, KWW = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
 
   function processTerm(t) {
     var x = norm(t).replace(/[.,;:!?()]/g, "");
@@ -74,6 +74,9 @@
     return d[m][n];
   }
   function istAnfang(w) { if (w.length < 3) return true; for (var v in VOCAB) if (v.indexOf(w) === 0) return true; return false; }
+  // Anfang eines ungekuerzten Worts oder Wortteils aus dem Index ("raeuchermaennch" -> "raeuchermaennchen", Stamm ist
+  // "raeuchermann"; "kal" -> Wortteil "kalender" aus "wandkalender")
+  function rohAnfang(w) { var v; for (v in ROH) if (v.indexOf(w) === 0) return true; for (v in TEILE) if (v.indexOf(w) === 0) return true; return false; }
   function bekannt(w) { return VOCAB[w] || TEILE[w] || /\d/.test(w) || istAnfang(w); }
   // Getipptes ist der Anfang eines Synonyms ("schwipp" -> "schwippbogen" -> schwibbogen): Synonym gewinnt
   function synAnfang(w) {
@@ -108,7 +111,7 @@
     return best && kand[best] === 2 ? stem(SYN[best]) : best;
   }
   function meinten(q) {
-    var terms = [], weg = [], geaendert = false;
+    var terms = [], weg = [], geaendert = false, retten = [], rettenTok = [];
     tokenize(q).forEach(function (tok) {
       var r = queryTerm(tok); if (!r) return;
       r.forEach(function (w) {
@@ -118,9 +121,12 @@
         // Wortstamm kann zu kurz fuer die Korrektur sein ("barun" -> "baru"): dann das ganze Wort pruefen
         var c = korrektur(w), roh = norm(tok);
         if (!c && roh !== w) { c = korrektur(roh); if (c && (Math.abs(c.length - roh.length) > 1 || dl(roh, c) > 1)) c = null; }
-        if (c) { terms.push(c); geaendert = true; } else { weg.push(tok); geaendert = true; }
+        if (c) { terms.push(c); geaendert = true; } else { if (KWW[w]) { retten.push(w); rettenTok.push(tok); } weg.push(tok); geaendert = true; }
       });
     });
+    // Wort nur in den Keywords ("acdc"): nur nehmen, wenn sonst gar nichts uebrig bliebe. Zu VOCAB gehoert kw nicht,
+    // sonst wuerden Keyword-Woerter nicht mehr zerlegt und nicht mehr unscharf gesucht (261 Suchbegriffe schlechter)
+    if (!terms.length && retten.length) return { terms: retten, weg: weg.filter(function (t) { return rettenTok.indexOf(t) < 0; }) };
     return geaendert ? { terms: terms, weg: weg } : null;
   }
 
@@ -154,6 +160,8 @@
         });
       });
     });
+    KWW = {};
+    docs.forEach(function (d) { tokenize(d.kw || "").forEach(function (t) { var r = processTerm(t); if (r) r.forEach(function (w) { KWW[w] = 1; }); }); });
     st.ms = new MiniSearch({
       idField: "id", fields: ["n", "v", "a", "nr", "e", "h", "kat", "t", "fx", "kw", "sw"], storeFields: ["i", "h", "vk"],
       processTerm: processTerm, tokenize: tokenize,
@@ -285,10 +293,19 @@
         return VSHOW[stem(z)] || z;
       }).join(" ");
     }
+    clearTimeout(st.zuTimer);
     if (!items.length) {
-      // Wer gerade weitertippt ("herrenu" nach "herren"), behaelt die letzte Liste; sonst Ceres-Rueckfall
-      if (st.letzteQ && (q.indexOf(st.letzteQ) === 0 || st.letzteQ.indexOf(q) === 0) && st.panel && st.panel.style.display === "block") return;
-      schliessen(); st.alle = []; ceresErlauben(true); return; // wirklich nichts gefunden: Plenty darf helfen
+      var nichts = function () { schliessen(); st.alle = []; ceresErlauben(true); }; // wirklich nichts gefunden: Plenty darf helfen
+      // Wer gerade weitertippt ("herrenu" nach "herren"), behaelt die letzte Liste
+      if (st.letzteQ && (q.indexOf(st.letzteQ) === 0 || st.letzteQ.indexOf(q) === 0) && st.panel && st.panel.style.display === "block") {
+        // Kann das letzte Wort kein bekanntes Wort mehr werden ("simson" nach der Liste von "si"), geht die Liste zu,
+        // sobald eine Weile nicht getippt wird – beim fluessigen Tippen ueber Tippfehler hinweg springt nichts
+        var toks = tokenize(q), letztes = toks.length ? norm(toks[toks.length - 1]).replace(/[.,;:!?()]/g, "") : "";
+        if (!(istAnfang(letztes) || synAnfang(letztes) || (processTerm(letztes) || []).some(istAnfang) || rohAnfang(letztes)))
+          st.zuTimer = setTimeout(function () { if (st.q === q) nichts(); }, ZU_MS);
+        return;
+      }
+      nichts(); return;
     }
     st.letzteQ = q; ceresErlauben(false);
     var p = panelFuer(input);
@@ -727,5 +744,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.6" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.7" };
 })();

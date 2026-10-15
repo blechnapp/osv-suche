@@ -2,6 +2,11 @@
 
 Neueste Version oben. Jede Version ist ein Git-Tag; im Plugin-Set wird der Tag gewählt.
 
+## 0.9.7 (14.10.2026)
+
+- Wörter, die nur in den Keywords stehen (ACDC, Politiker, Wärmepyramide), werden gefunden, wenn sonst nichts übrig bliebe
+- Sofort-Liste: Kann das getippte Wort kein bekanntes Wort mehr werden, geht die alte Liste nach einer kurzen Tipp-Pause zu (Simson zeigt nicht mehr die Liste von „Si“); beim flüssigen Weitertippen bleibt sie wie bisher stehen
+
 ## 0.9.6 (09.10.2026)
 
 - Ergebnisebene beginnt unter dem Shop-Kopf, auch nach dem Scrollen
