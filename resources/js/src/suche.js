@@ -21,7 +21,7 @@
     return t.replace(/(oegen|ogen)$/, "ogen").replace(/(chen|innen|ern|en|er|e|n|s)$/, "");
   }
   var STOP = {}; "mit und fuer fuers der die das den dem des ein eine einer einem eines aus von vom zum zur im in am an auf ohne als oder ganz sehr cm mm m hoch gross grosse grosser kleine klein kleiner neu neue neuer nr stueck stk inh ek e.k gmbh kg eg co erzgeb original".split(" ").forEach(function (w) { STOP[w] = 1; });
-  var FW = {}, ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, KWW = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1;
+  var FW = {}, ROH = {}, SYN = {}, HERKUNFT = {}, EIGEN = {}, ABW = [], VOCAB = {}, KWW = {}, TEILE = {}, VFREQ = {}, VSHOW = {}, LOGMAX = 1, GERETTET = {};
 
   function processTerm(t) {
     var x = norm(t).replace(/[.,;:!?()]/g, "");
@@ -112,6 +112,7 @@
   }
   function meinten(q) {
     var terms = [], weg = [], geaendert = false, retten = [], rettenTok = [];
+    GERETTET = {};
     tokenize(q).forEach(function (tok) {
       var r = queryTerm(tok); if (!r) return;
       r.forEach(function (w) {
@@ -126,6 +127,9 @@
     });
     // Wort nur in den Keywords ("acdc"): nur nehmen, wenn sonst gar nichts uebrig bliebe. Zu VOCAB gehoert kw nicht,
     // sonst wuerden Keyword-Woerter nicht mehr zerlegt und nicht mehr unscharf gesucht (261 Suchbegriffe schlechter)
+    // Gerettete Woerter nicht in den Wortteilen suchen: dort fand "honeck" unscharf 19 Rauchschnecken ("hneck" aus
+    // "rauchschnecke"); in den ganzen Woertern bleibt die Unschaerfe ("aepfel" -> "apfel")
+    if (!terms.length && retten.length) retten.forEach(function (w) { GERETTET[w] = 1; (queryTerm(w) || []).forEach(function (x) { GERETTET[x] = 1; }); });
     if (!terms.length && retten.length) return { terms: retten, weg: weg.filter(function (t) { return rettenTok.indexOf(t) < 0; }) };
     return geaendert ? { terms: terms, weg: weg } : null;
   }
@@ -200,7 +204,7 @@
   function suchen(q, jeVariante) {
     var cfg = st.cfg, eb = (cfg.eigenmarkenBonus || 0) / 100, vb = (cfg.verkaufsBonus || 0) / 100, af = (cfg.abwertFaktor || 100) / 100;
     var opts = function (mode) {
-      return {
+      var o = {
         boostTerm: function (term) { return HERKUNFT[term] ? 0.15 : 1; },
         boost: { n: 3, v: 1.2, a: 1, kat: 4, h: 1, nr: 4, e: 5, t: 1.0, fx: 0.8, kw: 0.5, sw: 0.5 },
         prefix: function (t) { return t.length >= 2 && !/^\d+$/.test(t); },
@@ -214,8 +218,11 @@
           return f;
         }
       };
+      if (gerettet) o.fields = ["n", "v", "a", "nr", "e", "h", "kat", "fx", "kw", "sw"];
+      return o;
     };
     var toks = tokenize(q).filter(function (t) { var r = queryTerm(t); return r && r.length; });
+    var gerettet = toks.some(function (t) { return queryTerm(t).some(function (w) { return GERETTET[w]; }); });
     var kern = toks.filter(function (t) { return !queryTerm(t).every(function (w) { return HERKUNFT[w]; }); });
     var herk = toks.filter(function (t) { return queryTerm(t).every(function (w) { return HERKUNFT[w]; }); });
     var basis = kern.length ? kern : toks, qk = basis.join(" ");
@@ -272,7 +279,9 @@
       p.style.left = (12 - r.left) + "px"; p.style.right = "auto"; p.style.width = (window.innerWidth - 24) + "px";
     } else { p.style.left = "0"; p.style.right = "0"; p.style.width = ""; }
   }
-  function schliessen() { if (st.panel) st.panel.style.display = "none"; document.body.classList.remove("osvs-zeigt"); st.sel = -1; st.items = []; }
+  // Leer-Zeile nur, wo das CSS den Ceres-Kasten per :has() pruefen kann; sonst bleibt es wie bisher
+  var HAS = !!(window.CSS && CSS.supports && CSS.supports("selector(:has(a))"));
+  function schliessen() { st.leer = false; if (st.panel) st.panel.style.display = "none"; document.body.classList.remove("osvs-zeigt"); st.sel = -1; st.items = []; }
   function ceresErlauben(ja) { document.body.classList.toggle("osvs-ceres", !!ja); }
   function zeigen(input, q) {
     st.input = input; st.q = q;
@@ -295,7 +304,16 @@
     }
     clearTimeout(st.zuTimer);
     if (!items.length) {
-      var nichts = function () { schliessen(); st.alle = []; ceresErlauben(true); }; // wirklich nichts gefunden: Plenty darf helfen
+      // Wirklich nichts gefunden: Plenty darf helfen. Findet Plenty auch nichts, blendet das CSS dessen leeren Kasten
+      // (dreimal "Keine Suchergebnisse") aus und zeigt stattdessen unsere eine Zeile; findet Plenty etwas, umgekehrt
+      var nichts = function () {
+        schliessen(); st.alle = []; ceresErlauben(true);
+        if (!HAS) return;
+        var p = panelFuer(input); st.leer = true; p.classList.add("osvs-leer");
+        p.innerHTML = '<div class="osvs-leer-text">Keine Treffer für „<b>' + esc(q) + "</b>“</div>";
+        p.style.display = "block"; breite(p);
+      };
+      if (st.leer && st.panel && st.panel.style.display === "block") { nichts(); return; }
       // Wer gerade weitertippt ("herrenu" nach "herren"), behaelt die letzte Liste
       if (st.letzteQ && (q.indexOf(st.letzteQ) === 0 || st.letzteQ.indexOf(q) === 0) && st.panel && st.panel.style.display === "block") {
         // Kann das letzte Wort kein bekanntes Wort mehr werden ("simson" nach der Liste von "si"), geht die Liste zu,
@@ -308,7 +326,7 @@
       nichts(); return;
     }
     st.letzteQ = q; ceresErlauben(false);
-    var p = panelFuer(input);
+    var p = panelFuer(input); st.leer = false; p.classList.remove("osvs-leer");
     st.alle = items; st.fuerPlenty = fuerPlenty; st.hinweis = hinweis; st.offen = false;
     zeichnen(p, q, false);
     p.style.display = "block";
@@ -744,5 +762,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.7" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.8" };
 })();

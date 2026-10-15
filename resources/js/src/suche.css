@@ -1,5 +1,11 @@
 /* Ceres-Vorschlaege ausblenden, sobald unsere Suche bereit ist; nur bei 'nichts gefunden' (osvs-ceres) zeigen */
 body.osvs-bereit:not(.osvs-ceres) .autocomplete-suggestions{display:none!important}
+/* Findet auch Plenty nichts: dessen leeren Kasten weg, unsere Zeile "Keine Treffer" zeigen; findet Plenty etwas, unsere Zeile weg */
+@supports selector(:has(a)){
+body.osvs-bereit.osvs-ceres .autocomplete-suggestions:not(:has(.autocomplete-suggestion)){display:none!important}
+body:has(.autocomplete-suggestions .autocomplete-suggestion) .osvs-panel.osvs-leer{display:none!important}
+}
+.osvs-leer-text{padding:12px;font-size:14px;color:#6b7280}
 .osvs-panel{display:none;position:absolute;top:100%;left:0;right:0;z-index:1100;background:#fff;border:1px solid #e3e0d9;border-radius:0 0 6px 6px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:75vh;overflow-y:auto;text-align:left}
 .osvs-hinweis{padding:8px 12px;font-size:13px;background:#fffbeb;color:#7c4a03;border-bottom:1px solid #f0e6c8}
 .osvs-hit{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f0ede6;color:#1d2433;text-decoration:none}

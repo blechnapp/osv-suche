@@ -2,6 +2,11 @@
 
 Neueste Version oben. Jede Version ist ein Git-Tag; im Plugin-Set wird der Tag gewählt.
 
+## 0.9.8 (15.10.2026)
+
+- Sofort-Liste: Findet weder die Suche noch Plenty etwas, steht dort eine Zeile „Keine Treffer für …“ statt Plentys Kasten mit dreimal „Keine Suchergebnisse gefunden“
+- Wörter, die nur über die Keywords gefunden werden, werden genau gesucht, nicht unscharf (Honecker zeigt keine Rauchschnecken mehr)
+
 ## 0.9.7 (14.10.2026)
 
 - Wörter, die nur in den Keywords stehen (ACDC, Politiker, Wärmepyramide), werden gefunden, wenn sonst nichts übrig bliebe
