@@ -2,6 +2,10 @@
 
 Neueste Version oben. Jede Version ist ein Git-Tag; im Plugin-Set wird der Tag gewählt.
 
+## 0.9.9 (16.10.2026)
+
+- Wörter, die nur über die Keywords gefunden werden (Honecker, Wärmepyramide): Der Link „Alle … Artikel anzeigen“ sucht mit dem getippten Wort statt mit dem Wortstamm („honecker“ statt „honeck“), der Hinweis „Ergebnisse für …“ entfällt dort
+
 ## 0.9.8 (15.10.2026)
 
 - Sofort-Liste: Findet weder die Suche noch Plenty etwas, steht dort eine Zeile „Keine Treffer für …“ statt Plentys Kasten mit dreimal „Keine Suchergebnisse gefunden“

@@ -130,7 +130,8 @@
     // Gerettete Woerter nicht in den Wortteilen suchen: dort fand "honeck" unscharf 19 Rauchschnecken ("hneck" aus
     // "rauchschnecke"); in den ganzen Woertern bleibt die Unschaerfe ("aepfel" -> "apfel")
     if (!terms.length && retten.length) retten.forEach(function (w) { GERETTET[w] = 1; (queryTerm(w) || []).forEach(function (x) { GERETTET[x] = 1; }); });
-    if (!terms.length && retten.length) return { terms: retten, weg: weg.filter(function (t) { return rettenTok.indexOf(t) < 0; }) };
+    // zeige: die getippten Woerter (fuer Hinweis, Link und GA4) statt des Wortstamms ("honecker" statt "honeck")
+    if (!terms.length && retten.length) return { terms: retten, weg: weg.filter(function (t) { return rettenTok.indexOf(t) < 0; }), zeige: rettenTok };
     return geaendert ? { terms: terms, weg: weg } : null;
   }
 
@@ -290,8 +291,9 @@
     if (k && k.terms.length) {
       items = suchen(k.terms.join(" "));
       if (items.length) {
-        fuerPlenty = k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ");
-        hinweis = "Ergebnisse für <b>" + esc(fuerPlenty) + "</b>" + (k.weg.length ? " (ohne „" + esc(k.weg.join(" ")) + "“)" : "");
+        fuerPlenty = k.zeige ? k.zeige.join(" ") : k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ");
+        // Ueber Keywords gefunden: gesucht wurde, was getippt wurde – Hinweis nur, wenn ein Wort weggelassen wurde
+        if (!k.zeige || k.weg.length) hinweis = "Ergebnisse für <b>" + esc(fuerPlenty) + "</b>" + (k.weg.length ? " (ohne „" + esc(k.weg.join(" ")) + "“)" : "");
       }
     } else if (!k) {
       items = suchen(q);
@@ -461,7 +463,7 @@
       var hinweis = "", alle = [], k = meinten(q);
       if (k && k.terms.length) {
         alle = suchen(k.terms.join(" "), true);
-        if (alle.length) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
+        if (alle.length && !k.zeige) hinweis = "Ergebnisse für <b>" + esc(k.terms.map(function (w) { return VSHOW[w] || w; }).join(" ")) + "</b>";
       } else if (!k) alle = suchen(q, true);
       if (!alle.length) { gaOhneTreffer(q); leer(); return; } // Plentys Seite bleibt stehen
       if (gefunden) gefunden(alle.length);
@@ -762,5 +764,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.8" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.9" };
 })();
