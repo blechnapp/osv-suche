@@ -2,6 +2,10 @@
 
 Neueste Version oben. Jede Version ist ein Git-Tag; im Plugin-Set wird der Tag gewählt.
 
+## 0.11.0 (19.10.2026)
+
+- Ergebnisseite: Kacheln wie auf den Kategorieseiten, Schritt 2. Bewertungssterne mit Anzahl, gleiches HTML wie das Feedback-Plugin auf Kategoriekacheln; Gestaltung (und Ausblenden ohne Bewertung) von OSVBadges. Der Preisabruf liefert dafür Durchschnitt und Anzahl (Felder fd, fc); fehlen sie, bleibt die Kachel ohne Sterne
+
 ## 0.10.0 (19.10.2026)
 
 - Ergebnisseite: Kacheln wie auf den Kategorieseiten, Schritt 1. Lieferschild („Sofort versandfertig“, „Lieferbar ab …“) und am Rechner der Knopf „Zum Artikel“ kommen von OSVBadges (ab 0.7.0); die Suche liefert dafür Lieferbarkeit und Erscheinungsdatum mit (Preisabruf: neues Feld rel) und markiert ihre Kacheln mit osvk-voll

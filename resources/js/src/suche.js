@@ -455,6 +455,15 @@
         // Lieferbarkeit fuer das Lieferschild von OSVBadges (dort wie die Ceres-Kacheldaten gelesen)
         var k = e.closest(".osvs-kachel");
         if (k) { k.setAttribute("data-osvk-av", w.av || ""); k.setAttribute("data-osvk-avid", String(w.avId || 0)); k.setAttribute("data-osvk-rel", w.rel || ""); }
+        // Sterne mit demselben HTML wie das Feedback-Plugin auf Kategoriekacheln; Gestaltung und Ausblenden ohne Bewertung macht OSVBadges
+        if (k && w.fd != null && !k.querySelector(".feedback-stars-average")) {
+          var reihe = new Array(6).join('<div class="feedback-star"><i class="fa fa-star"></i></div> ');
+          var breite = Math.max(0, Math.min(100, Number(w.fd) * 20));
+          var meta = k.querySelector(".thumb-meta");
+          if (meta) meta.insertAdjacentHTML("afterbegin", '<div class="feedback-stars-average feedback-category-view"><div class="feedback-stars-background clearfix">' + reihe +
+            '</div> <div class="feedback-stars-overlay-wrap" style="width:' + breite + '%;"><div class="feedback-stars-overlay clearfix">' + reihe +
+            '</div></div> <span class="feedback-count">(' + (parseInt(w.fc, 10) || 0) + ")</span></div>");
+        }
       });
     }).catch(function () {});
   }
@@ -768,5 +777,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.10.0" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.11.0" };
 })();

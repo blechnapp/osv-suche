@@ -25,7 +25,7 @@ class IndexController extends Controller
     const SALES_KEY  = 'verkauf.json';
     const FACET_KEY  = 'facetten.json';
     const MAX_IDS    = 24;
-    const VERSION    = '0.10.0';
+    const VERSION    = '0.11.0';
     const STAND_KEY  = 'stand.txt';
 
     /** @var array Kategoriepfade je ID, beim Neuaufbau gefuellt */
@@ -149,6 +149,9 @@ class IndexController extends Controller
                     'av'  => $d['variation']['availability']['names']['name'] ?? '',
                     'avId'=> (int)($d['variation']['availabilityId'] ?? 0),
                     'rel' => $d['variation']['releasedAt'] ?? '',
+                    // Bewertungen wie auf den Kategoriekacheln (OSVBadges fordert diese Felder per requireFields an)
+                    'fd'  => $d['item']['feedbackDecimal'] ?? null,
+                    'fc'  => $d['item']['feedbackCount'] ?? null,
                     'ok'  => !empty($d['filter']['isSalable']),
                 ];
             }
