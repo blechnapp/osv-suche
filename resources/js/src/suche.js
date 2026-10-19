@@ -443,7 +443,8 @@
       '<div class="thumb-meta mt-2"><div class="prices"><div class="price osvs-p" data-id="' + d.id + '">' + esc(d.p) + ' *</div></div></div>' +
       '<a href="' + esc(d.u) + '" class="btn btn-primary btn-appearance osvs-ansehen">Artikel anzeigen <i class="fa fa-arrow-right" aria-hidden="true"></i></a>' +
       '<div class="vat small text-muted">* <span>inkl. ges. MwSt.</span> zzgl. <a data-toggle="modal" href="#shippingscosts" class="text-appearance">Versandkosten</a></div>' +
-      "</div></div></article></li>";
+      // „Zum Artikel“ gleich mitliefern (Klasse und Text wie OSVBadges, das ihn sonst erst bis zu 1 s später setzt): kein Aufblitzen des eigenen Knopfs
+      '</div></div><a class="osvk-zum" href="' + esc(d.u) + '">Zum Artikel <i class="fa fa-arrow-right" aria-hidden="true"></i></a></article></li>';
   }
   function seitePreise(el, list) {
     var ids = list.map(function (x) { return x.d.id; }).join(",");
@@ -777,5 +778,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.11.0" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.11.1" };
 })();

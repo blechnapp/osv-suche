@@ -2,6 +2,11 @@
 
 Neueste Version oben. Jede Version ist ein Git-Tag; im Plugin-Set wird der Tag gewählt.
 
+## 0.11.1 (19.10.2026)
+
+- Kein Aufblitzen des blauen Knopfs „Artikel anzeigen“ beim Wechsel der Kategorie oder beim Nachladen: Die Suchkachel bringt „Zum Artikel“ gleich mit (Klasse osvk-zum wie OSVBadges, Gestaltung weiter von OSVBadges); OSVBadges setzte ihn bisher erst bis zu 1 Sekunde später
+- Neue Versionsnummer auch, damit die Skript-Adresse (osvsuche.js?v=…) frisch ist: unter ?v=0.11.0 liegt im CDN von Set 72 versehentlich noch 0.10.0
+
 ## 0.11.0 (19.10.2026)
 
 - Ergebnisseite: Kacheln wie auf den Kategorieseiten, Schritt 2. Bewertungssterne mit Anzahl, gleiches HTML wie das Feedback-Plugin auf Kategoriekacheln; Gestaltung (und Ausblenden ohne Bewertung) von OSVBadges. Der Preisabruf liefert dafür Durchschnitt und Anzahl (Felder fd, fc); fehlen sie, bleibt die Kachel ohne Sterne
