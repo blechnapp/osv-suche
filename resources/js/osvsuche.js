@@ -2451,7 +2451,8 @@
   var SEITE = 24;
   function kachel(d) {
     var bild = String(d.b || "").replace("/preview/", "/middle/"), titel = esc(d.n + (d.v ? " " + d.v : ""));
-    return '<li class="col-12 col-md-4 col-lg-3"><article class="cmp cmp-product-thumb osvs-kachel"><div><div class="thumb-image"><div class="prop-1-1">' +
+    // Spalten wie Ceres-Kategorien; osvk-voll: OSVBadges gestaltet die Kachel wie auf Kategorieseiten (Lieferschild, „Zum Artikel“)
+    return '<li class="col-12 col-md-6 col-lg-3"><article class="cmp cmp-product-thumb osvs-kachel osvk-voll"><div><div class="thumb-image"><div class="prop-1-1">' +
       '<a href="' + esc(d.u) + '" aria-label="' + titel + '"><img src="' + esc(bild) + '" alt="' + titel + '" class="img-fluid" loading="lazy"></a></div></div>' +
       '<div class="thumb-content"><a href="' + esc(d.u) + '" class="thumb-title small">' + titel + '</a>' +
       '<div class="thumb-meta mt-2"><div class="prices"><div class="price osvs-p" data-id="' + d.id + '">' + esc(d.p) + ' *</div></div></div>' +
@@ -2465,7 +2466,10 @@
       if (!j || !j.preise) return;
       Object.keys(j.preise).forEach(function (id) {
         var e = el.querySelector('.osvs-p[data-id="' + id + '"]'), w = j.preise[id]; if (!e || !w) return;
-        e.innerHTML = (w.uvp && w.uvp !== w.p ? '<del class="osvs-uvp">' + esc(w.uvp) + "</del> " : "") + esc(w.p) + " *";
+        e.innerHTML = (w.uvp && w.uvp !== w.p ? '<del class="osvs-uvp">UVP ' + esc(w.uvp) + "</del> " : "") + esc(w.p) + " *";
+        // Lieferbarkeit fuer das Lieferschild von OSVBadges (dort wie die Ceres-Kacheldaten gelesen)
+        var k = e.closest(".osvs-kachel");
+        if (k) { k.setAttribute("data-osvk-av", w.av || ""); k.setAttribute("data-osvk-avid", String(w.avId || 0)); k.setAttribute("data-osvk-rel", w.rel || ""); }
       });
     }).catch(function () {});
   }
@@ -2779,5 +2783,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.9.9" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.10.0" };
 })();

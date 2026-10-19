@@ -2,6 +2,12 @@
 
 Neueste Version oben. Jede Version ist ein Git-Tag; im Plugin-Set wird der Tag gewählt.
 
+## 0.10.0 (19.10.2026)
+
+- Ergebnisseite: Kacheln wie auf den Kategorieseiten, Schritt 1. Lieferschild („Sofort versandfertig“, „Lieferbar ab …“) und am Rechner der Knopf „Zum Artikel“ kommen von OSVBadges (ab 0.7.0); die Suche liefert dafür Lieferbarkeit und Erscheinungsdatum mit (Preisabruf: neues Feld rel) und markiert ihre Kacheln mit osvk-voll
+- UVP mit „UVP“ davor wie auf den Kategorieseiten, Spalten am Tablet wie dort (2 statt 3)
+- Ohne OSVBadges 0.7.0 bleibt die Kachel wie bisher (eigener Knopf „Artikel anzeigen“)
+
 ## 0.9.9 (16.10.2026)
 
 - Wörter, die nur über die Keywords gefunden werden (Honecker, Wärmepyramide): Der Link „Alle … Artikel anzeigen“ sucht mit dem getippten Wort statt mit dem Wortstamm („honecker“ statt „honeck“), der Hinweis „Ergebnisse für …“ entfällt dort
