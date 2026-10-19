@@ -479,8 +479,11 @@
     korbVms = korbVms.filter(function (vm) { if (document.body.contains(vm.$el)) return true; vm.$destroy(); return false; });
     k.setAttribute("data-osvs-korb", "1");
     var link = k.querySelector("a.thumb-title"), ceres = app.$ceres || {}, cfg = (window.App && App.config && App.config.item) || {};
-    var stufe = (w.sc > 1 && !!ceres.isCheapestSorting) || (w.sc === 1 && w.gpn > 1 && !!cfg.enableGraduatedPrices);
-    var props = { variationId: +id, isSalable: !!w.ok, hasChildren: w.sc > 1, intervalQuantity: w.iq || 1, minimumQuantity: w.mn, maximumQuantity: w.mx,
+    // Variantenzahl wie in der Kategoriekachel: dort steht jede Variante als eigene Kachel und Ceres bekommt 1 (gemessen 19.10.2026,
+    // z. B. Maritim 6955: Kategorie 1, Artikel hat 10). Mit der Zahl des ganzen Artikels schickte Ceres zur Artikelseite statt in den Korb.
+    var sc = 1;
+    var stufe = (sc > 1 && !!ceres.isCheapestSorting) || (sc === 1 && w.gpn > 1 && !!cfg.enableGraduatedPrices);
+    var props = { variationId: +id, isSalable: !!w.ok, hasChildren: sc > 1, intervalQuantity: w.iq || 1, minimumQuantity: w.mn, maximumQuantity: w.mx,
       orderProperties: w.op || [], hasOrderProperties: !!w.hop, hasRequiredOrderProperty: !!w.hrop, showQuantity: false,
       itemUrl: link ? link.getAttribute("href") : "", hasPrice: !!w.hp, hasGraduatedPrice: stufe, itemType: w.it };
     var oben = k.firstElementChild, vat = k.querySelector(".vat");
@@ -803,5 +806,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.12.0" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.12.1" };
 })();

@@ -2,6 +2,10 @@
 
 Neueste Version oben. Jede Version ist ein Git-Tag; im Plugin-Set wird der Tag gewählt.
 
+## 0.12.1 (19.10.2026)
+
+- Warenkorb aus der Suchkachel: Artikel mit mehreren Varianten (z. B. Maritim, Nussknacker König) gingen zur Artikelseite statt in den Korb. Die Suche übergab die Variantenzahl des ganzen Artikels; die Kategoriekachel übergibt 1, weil jede Variante eine eigene Kachel ist. Jetzt wie dort
+
 ## 0.12.0 (19.10.2026)
 
 - Ergebnisseite: Warenkorb direkt aus der Kachel wie auf den Kategorieseiten (Schritt 3a). Die Suche setzt dafür Ceres' eigenen Baustein add-to-basket ein (Symbol oben rechts am Rechner, Knopf „In den Warenkorb“ am Handy), mit denselben Angaben wie die Ceres-Kategoriekachel; Ceres legt in den Korb, zählt, zeigt die Vorschau und schickt bei Varianten oder Bestellmerkmalen zur Artikelseite. Am Handy weicht „Artikel anzeigen“ dem Ceres-Knopf
