@@ -25,7 +25,7 @@ class IndexController extends Controller
     const SALES_KEY  = 'verkauf.json';
     const FACET_KEY  = 'facetten.json';
     const MAX_IDS    = 24;
-    const VERSION    = '0.11.1';
+    const VERSION    = '0.12.0';
     const STAND_KEY  = 'stand.txt';
 
     /** @var array Kategoriepfade je ID, beim Neuaufbau gefuellt */
@@ -152,12 +152,37 @@ class IndexController extends Controller
                     // Bewertungen wie auf den Kategoriekacheln (OSVBadges fordert diese Felder per requireFields an)
                     'fd'  => $d['item']['feedbackDecimal'] ?? null,
                     'fc'  => $d['item']['feedbackCount'] ?? null,
+                    // Für den Ceres-Baustein add-to-basket, dieselben Angaben wie in der Ceres-Kategoriekachel
+                    'sc'  => (int)($d['item']['salableVariationCount'] ?? 1),
+                    'iq'  => $d['variation']['intervalOrderQuantity'] ?? null,
+                    'mn'  => $d['variation']['minimumOrderQuantity'] ?? null,
+                    'mx'  => (($d['variation']['maximumOrderQuantity'] ?? 0) > 0) ? $d['variation']['maximumOrderQuantity'] : null,
+                    'op'  => $this->bestellmerkmale($d['properties'] ?? []),
+                    'hop' => !empty($d['hasOrderProperties']),
+                    'hrop'=> !empty($d['hasRequiredOrderProperty']),
+                    'hp'  => (isset($d['prices']['default']['price']['value']) && is_numeric($d['prices']['default']['price']['value'])) || (($d['item']['itemType'] ?? '') === 'set'),
+                    'gpn' => count($d['prices']['graduatedPrices'] ?? []),
+                    'it'  => $d['item']['itemType'] ?? 'default',
                     'ok'  => !empty($d['filter']['isSalable']),
                 ];
             }
         }
         $body = json_encode(['dauerMs' => (int)round((microtime(true) - $start) * 1000), 'preise' => (object)$out], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         return $response->make($body, 200, ['Content-Type' => 'application/json; charset=utf-8']);
+    }
+
+    /**
+     * Bestellmerkmale wie in der Ceres-Kategoriekachel: item.properties mit property.isOderProperty (Schreibweise von Plenty)
+     */
+    private function bestellmerkmale(array $props): array
+    {
+        $out = [];
+        foreach ($props as $p) {
+            if (!empty($p['property']['isOderProperty'])) {
+                $out[] = $p;
+            }
+        }
+        return $out;
     }
 
     /**

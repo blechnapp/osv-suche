@@ -2,6 +2,11 @@
 
 Neueste Version oben. Jede Version ist ein Git-Tag; im Plugin-Set wird der Tag gewählt.
 
+## 0.12.0 (19.10.2026)
+
+- Ergebnisseite: Warenkorb direkt aus der Kachel wie auf den Kategorieseiten (Schritt 3a). Die Suche setzt dafür Ceres' eigenen Baustein add-to-basket ein (Symbol oben rechts am Rechner, Knopf „In den Warenkorb“ am Handy), mit denselben Angaben wie die Ceres-Kategoriekachel; Ceres legt in den Korb, zählt, zeigt die Vorschau und schickt bei Varianten oder Bestellmerkmalen zur Artikelseite. Am Handy weicht „Artikel anzeigen“ dem Ceres-Knopf
+- Preisabruf liefert dafür zusätzlich sc, iq, mn, mx, op, hop, hrop, hp, gpn, it
+
 ## 0.11.1 (19.10.2026)
 
 - Kein Aufblitzen des blauen Knopfs „Artikel anzeigen“ beim Wechsel der Kategorie oder beim Nachladen: Die Suchkachel bringt „Zum Artikel“ gleich mit (Klasse osvk-zum wie OSVBadges, Gestaltung weiter von OSVBadges); OSVBadges setzte ihn bisher erst bis zu 1 Sekunde später

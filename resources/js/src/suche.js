@@ -465,8 +465,33 @@
             '</div> <div class="feedback-stars-overlay-wrap" style="width:' + breite + '%;"><div class="feedback-stars-overlay clearfix">' + reihe +
             '</div></div> <span class="feedback-count">(' + (parseInt(w.fc, 10) || 0) + ")</span></div>");
         }
+        if (k && w.it) { try { korbKnopf(k, id, w); } catch (x) { /* Kachel bleibt mit „Artikel anzeigen“ */ } }
       });
     }).catch(function () {});
+  }
+  // Warenkorb wie in der Ceres-Kategoriekachel: Ceres' eigener Baustein add-to-basket, an die laufende Ceres-App gehängt.
+  // Ceres legt in den Korb, zählt, zeigt die Vorschau und schickt bei Varianten/Bestellmerkmalen zur Artikelseite.
+  // Kein Vue.component, kein Zugriff auf den Ceres-Speicher; zwei Einsätze wie in der Kategoriekachel (Ecke am Rechner, Knopf am Handy).
+  var korbVms = [];
+  function korbKnopf(k, id, w) {
+    var app = window.vueApp, V = window.Vue || (app && app.constructor);
+    if (!app || !app._isMounted || !V || k.getAttribute("data-osvs-korb")) return;
+    korbVms = korbVms.filter(function (vm) { if (document.body.contains(vm.$el)) return true; vm.$destroy(); return false; });
+    k.setAttribute("data-osvs-korb", "1");
+    var link = k.querySelector("a.thumb-title"), ceres = app.$ceres || {}, cfg = (window.App && App.config && App.config.item) || {};
+    var stufe = (w.sc > 1 && !!ceres.isCheapestSorting) || (w.sc === 1 && w.gpn > 1 && !!cfg.enableGraduatedPrices);
+    var props = { variationId: +id, isSalable: !!w.ok, hasChildren: w.sc > 1, intervalQuantity: w.iq || 1, minimumQuantity: w.mn, maximumQuantity: w.mx,
+      orderProperties: w.op || [], hasOrderProperties: !!w.hop, hasRequiredOrderProperty: !!w.hrop, showQuantity: false,
+      itemUrl: link ? link.getAttribute("href") : "", hasPrice: !!w.hp, hasGraduatedPrice: stufe, itemType: w.it };
+    var oben = k.firstElementChild, vat = k.querySelector(".vat");
+    if (!oben || !vat) return;
+    [[oben, true, "afterbegin"], [vat, false, "beforebegin"]].forEach(function (s) {
+      var ziel = document.createElement("div");
+      if (s[2] === "afterbegin") s[0].insertBefore(ziel, s[0].firstChild); else s[0].parentNode.insertBefore(ziel, s[0]);
+      var p = {}; for (var n in props) p[n] = props[n]; p.useLargeScale = s[1];
+      var vm = new V({ parent: app, render: function (h) { return h("add-to-basket", { props: p, attrs: s[1] ? { "data-testing": "item-add-to-basket" } : {} }); } });
+      vm.$mount(ziel); korbVms.push(vm);
+    });
   }
   function preisZahl(t) { var m = String(t || "").replace(/\./g, "").replace(",", ".").match(/[\d.]+/); return m ? parseFloat(m[0]) : 0; }
   // Wie in der PWA (filters.config.ts): Sammelkategorien zaehlen nicht als "passende Kategorie"
@@ -778,5 +803,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.11.1" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.12.0" };
 })();
