@@ -2684,6 +2684,8 @@
   }
   function ueberschrift(q) {
     var h = [].filter.call(document.querySelectorAll("h1"), function (x) { return /Suchergebnisse/.test(x.textContent); })[0];
+    // Tag-Seiten nutzen die Ergebnisseite mit eigener Ueberschrift ("Mit Tag ... verknuepfte Artikel"): dann die Hauptueberschrift der Seite
+    if (!h) h = [].filter.call(document.querySelectorAll("h1"), function (x) { return !x.closest(".osvs-sofort"); })[0];
     if (h) h.textContent = "Suchergebnisse für: " + q;
   }
   // GA4: Suchen ohne Neuladen selbst melden (beim Seitenaufruf mit ?query= meldet GA4 sie von allein).
@@ -2730,7 +2732,7 @@
 
   // Tab-Titel waehrend der Ebene wie Plentys Ergebnisseite, damit GA4 und Verlauf die Suche richtig benennen
   var TITEL_SUCHE = "Artikelsuchergebnisse | Seiffener Volkskunst", altTitel = null;
-  var schicht = null, merkY = 0;
+  var schicht = null, merkY = 0, getauscht = false;
   // Ebene beginnt unter dem Shop-Kopf (Logo, Menue, Warenkorb bleiben sichtbar).
   // Ceres schaltet den Kopf nach dem ersten Scrollen um (fixed-top), danach meldet er die Hoehe 0, obwohl er
   // oben sichtbar ist. Deshalb messen, solange die Seite ganz oben steht, und diesen Wert verwenden.
@@ -2755,6 +2757,8 @@
     if (!schicht) return;
     schicht.remove(); schicht = null;
     document.documentElement.classList.remove("osvs-sofort-offen");
+    // die Ebene hat beim Anzeigen osvs-ergebnis-aktiv gesetzt; ausserhalb der Ergebnisseite blendet die Klasse sonst die Kategorieliste aus
+    if (!document.querySelector("[data-osvs-ergebnis]")) document.body.classList.remove("osvs-ergebnis-aktiv");
     if (altTitel !== null) { document.title = altTitel; altTitel = null; }
     // zurueck an die Stelle vor der Suche; nach "Zurueck" setzt der Browser die Position selbst, deshalb kurz danach noch einmal
     var y = merkY;
@@ -2775,7 +2779,7 @@
       document.body.classList.remove("osvs-aus");
       var el = frischesWidget(hier); el.style.display = "";
       ueberschrift(q);
-      history.pushState({ osvs: q }, "", url);
+      history.pushState({ osvs: q }, "", url); getauscht = true;
       // ohne Treffer meldet Plentys Seite die Suche selbst, deshalb nur bei eigenen Treffern melden
       ergebnisRendern(el, q, plenty, function (n) { gaSuche(q, n); });
       window.scrollTo(0, 0);
@@ -2819,9 +2823,9 @@
       return;
     }
     if (schicht) { schichtZu(); return; }
-    // zurueck auf eine Ergebnis-Adresse ohne eigenen Zustand: Seite neu laden
-    if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
+    // zurueck auf eine Ergebnis-Adresse ohne eigenen Zustand (auch eine Tag-Seite, auf der wir Treffer eingesetzt haben): Seite neu laden
+    if (getauscht || /\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.12.2" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.12.3" };
 })();

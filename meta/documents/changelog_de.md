@@ -2,6 +2,11 @@
 
 Neueste Version oben. Jede Version ist ein Git-Tag; im Plugin-Set wird der Tag gewählt.
 
+## 0.12.3 (20.10.2026)
+
+- Suchebene auf Kategorie-, Artikel- und Startseite: Nach dem Schließen (✕ oder „Zurück“) blieb die Artikelliste der Kategorie ausgeblendet (seit 0.9.0). Die Ebene setzte die Klasse osvs-ergebnis-aktiv, die außerhalb der Ergebnisseite Plentys Liste versteckt, und nahm sie beim Schließen nicht zurück. Jetzt wird sie beim Schließen entfernt
+- Suche von einer Tag-Seite aus (z. B. /halloween_t38/, Begriff eingeben, Enter): Die Überschrift wechselt jetzt auf „Suchergebnisse für: …“ statt „Mit Tag … verknüpfte Artikel“ stehen zu lassen. „Zurück“ bis auf die Tag-Seite lädt sie neu, statt die zuletzt gesuchten Treffer unter der Tag-Adresse stehen zu lassen
+
 ## 0.12.2 (20.10.2026)
 
 - Tag-Seiten (z. B. /halloween_t38/), /search ohne Begriff und Suchen mit nur einem Buchstaben zeigen wieder Plentys Artikelliste. Bisher blendete die Suche Plentys Liste aus und zeigte dauerhaft „Suchergebnisse werden geladen …“, weil sie ohne Suchbegriff (unter 2 Zeichen) nichts tat und auch nicht zurücktrat (seit 0.7.0). Meldung Alex 19.10.2026
