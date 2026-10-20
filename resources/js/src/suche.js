@@ -651,7 +651,8 @@
   function ergebnisseite() {
     var el = document.querySelector("[data-osvs-ergebnis]"); if (!el) return;
     var q = (new URLSearchParams(window.location.search).get("query") || "").trim();
-    if (q.length < 2) return;
+    // ohne Suchbegriff (Tag-Seite, /search, ein Buchstabe) zeigt Plenty seine eigene Seite
+    if (q.length < 2) { document.body.classList.add("osvs-aus"); return; }
     ergebnisRendern(el, q);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ergebnisseite); else ergebnisseite();
@@ -748,6 +749,7 @@
   window.addEventListener("resize", schichtOben);
   function sofort(q, eingabe) {
     q = (q || "").trim(); if (q.length < 2) return false;
+    document.documentElement.classList.remove("osvs-ohne-begriff");
     var plenty = function () { var k = meinten(q); var w = k && k.terms.length ? k.terms.map(function (x) { return VSHOW[x] || x; }).join(" ") : q; window.location.href = SUCH_URL + encodeURIComponent(w); };
     var url = SUCH_URL + encodeURIComponent(q);
     if (eingabe) eingabe.blur();
@@ -806,5 +808,5 @@
     if (/\/artikelsuchergebnisse/.test(location.pathname)) location.reload();
   });
 
-  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.12.1" };
+  window.OSVSuche = { laden: laden, suchen: function (q, v) { return suchen(q, v); }, version: "0.12.2" };
 })();

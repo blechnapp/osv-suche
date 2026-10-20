@@ -1,17 +1,20 @@
 <style>
 /* OSVSuche: Auf der Ergebnisseite Plentys Liste von Anfang an ausblenden, solange unsere Ergebnisse laden.
-   body.osvs-aus = unsere Suche hat nichts gefunden oder ist ausgefallen -> Plentys Seite bleibt sichtbar. */
-html:not(.osvs-aus-html) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),
-html:not(.osvs-aus-html) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-pagination,
-html:not(.osvs-aus-html) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-toolbar,
-html:not(.osvs-aus-html) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-selected-filter,
-html:not(.osvs-aus-html) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-filter-base{display:none!important}
-body:not(.osvs-ergebnis-aktiv):not(.osvs-aus) .osvs-ergebnis{min-height:60vh}
-body:not(.osvs-ergebnis-aktiv):not(.osvs-aus) .osvs-ergebnis-kopf::before{content:"Suchergebnisse werden geladen …";display:block;color:#7a8594;font-size:15px;padding:8px 0}
+   body.osvs-aus = unsere Suche hat nichts gefunden oder ist ausgefallen -> Plentys Seite bleibt sichtbar.
+   html.osvs-ohne-begriff = Adresse ohne Suchbegriff (Tag-Seite, /search, ein Buchstabe) -> Plentys Seite bleibt sichtbar. */
+html:not(.osvs-aus-html):not(.osvs-ohne-begriff) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-item-grid:not(.osvs-ergebnis .widget-item-grid),
+html:not(.osvs-aus-html):not(.osvs-ohne-begriff) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-pagination,
+html:not(.osvs-aus-html):not(.osvs-ohne-begriff) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-toolbar,
+html:not(.osvs-aus-html):not(.osvs-ohne-begriff) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-selected-filter,
+html:not(.osvs-aus-html):not(.osvs-ohne-begriff) body:has([data-osvs-ergebnis]):not(.osvs-aus) .widget-filter-base{display:none!important}
+html:not(.osvs-ohne-begriff) body:not(.osvs-ergebnis-aktiv):not(.osvs-aus) .osvs-ergebnis{min-height:60vh}
+html:not(.osvs-ohne-begriff) body:not(.osvs-ergebnis-aktiv):not(.osvs-aus) .osvs-ergebnis-kopf::before{content:"Suchergebnisse werden geladen …";display:block;color:#7a8594;font-size:15px;padding:8px 0}
 </style>
 <script>
 /* OSVSuche: Version und (auf der Ergebnisseite) Index so frueh wie moeglich anfordern */
 (function(){
+  var q="";try{q=(new URLSearchParams(location.search).get("query")||"").trim();}catch(e){}
+  if(q.length<2)document.documentElement.className+=" osvs-ohne-begriff";
   window.__osvsVer=fetch("/rest/osv-suche/version",{credentials:"same-origin"}).then(function(r){return r.json();});
   if(/\/artikelsuchergebnisse/.test(location.pathname)){
     var c=null;try{c=JSON.parse(localStorage.getItem("osvsuche_index_v1")||"null");}catch(e){}

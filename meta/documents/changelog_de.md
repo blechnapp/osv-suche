@@ -2,6 +2,10 @@
 
 Neueste Version oben. Jede Version ist ein Git-Tag; im Plugin-Set wird der Tag gewählt.
 
+## 0.12.2 (20.10.2026)
+
+- Tag-Seiten (z. B. /halloween_t38/), /search ohne Begriff und Suchen mit nur einem Buchstaben zeigen wieder Plentys Artikelliste. Bisher blendete die Suche Plentys Liste aus und zeigte dauerhaft „Suchergebnisse werden geladen …“, weil sie ohne Suchbegriff (unter 2 Zeichen) nichts tat und auch nicht zurücktrat (seit 0.7.0). Meldung Alex 19.10.2026
+
 ## 0.12.1 (19.10.2026)
 
 - Warenkorb aus der Suchkachel: Artikel mit mehreren Varianten (z. B. Maritim, Nussknacker König) gingen zur Artikelseite statt in den Korb. Die Suche übergab die Variantenzahl des ganzen Artikels; die Kategoriekachel übergibt 1, weil jede Variante eine eigene Kachel ist. Jetzt wie dort
